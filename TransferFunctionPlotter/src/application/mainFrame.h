@@ -25,11 +25,13 @@
 
 // Local headers
 #include "utilities/dataset2D.h"
-#include "utilities/managedList.h"
+#include "application/dataManager.h"
 
 // wxWidgets forward declarations
 class wxGrid;
 class wxGridEvent;
+class wxSplitterWindow;
+class wxSplitterEvent;
 
 // Local forward declarations
 class PlotRenderer;
@@ -63,14 +65,26 @@ private:
 	void CreateControls(void);
 	void SetProperties(void);
 
-	PlotRenderer* CreatePlotArea(wxWindow *parent);
+	PlotRenderer* CreatePlotArea(wxWindow *parent, const wxString &title, const wxString &yLabel);
 	wxSizer* CreateButtons(wxWindow *parent);
 	wxGrid* CreateOptionsGrid(wxWindow *parent);
+	wxSizer* CreateInputControls(wxWindow *parent);
 
 	// Controls
 	wxGrid *optionsGrid;
 
-	PlotRenderer *plotArea;
+	wxRadioButton *frequencyUnitsHertzRadioButton;
+
+	wxTextCtrl *minFrequencyTextBox;
+	wxTextCtrl *maxFrequencyTextBox;
+
+	PlotRenderer *selectedAmplitudePlot;
+	PlotRenderer *selectedPhasePlot;
+	PlotRenderer *totalAmplitudePlot;
+	PlotRenderer *totalPhasePlot;
+
+	wxSplitterWindow *selectedSplitter;
+	wxSplitterWindow *totalSplitter;
 
 	enum Columns
 	{
@@ -94,7 +108,7 @@ private:
 	void CreateGridContextMenu(const wxPoint &position, const unsigned int &row);
 
 	void ClearAllCurves(void);
-	void AddCurve(Dataset2D *data, wxString name, const bool &rightAxis = false);
+	void AddCurve(wxString name);
 	void RemoveCurve(const unsigned int &i);
 
 	Color GetNextColor(const unsigned int &index) const;
@@ -105,7 +119,11 @@ private:
 		const bool &visible, const bool &rightAxis);
 	void UpdateCurveProperties(const unsigned int &index);
 
-	ManagedList<const Dataset2D> plotList;
+	void UpdateSelectedTransferFunction(const unsigned int &i);
+
+	void SetXLabels(void);
+
+	DataManager dataManager;
 
 	// The event IDs
 	enum MainFrameEventID
@@ -123,15 +141,14 @@ private:
 
 		idPlotContextToggleBottomGridlines,// Maintain this order for each axis' context IDs
 		idPlotContextAutoScaleBottom,
-		idPlotContextSetBottomLogarithmic,
 
 		idPlotContextToggleLeftGridlines,
 		idPlotContextAutoScaleLeft,
-		idPlotContextSetLeftLogarithmic,
 
 		idPlotContextToggleRightGridlines,
 		idPlotContextAutoScaleRight,
-		idPlotContextSetRightLogarithmic
+
+		idPlotSplitter
 	};
 
 	wxMenu *CreateAxisContextMenu(const unsigned int &baseEventId) const;
@@ -141,6 +158,10 @@ private:
 	// Buttons
 	void AddButtonClicked(wxCommandEvent &event);
 	void RemoveAllButtonClicked(wxCommandEvent &event);
+
+	// Other input controls
+	void TextBoxChangeEvent(wxFocusEvent &event);
+	void RadioButtonChangeEvent(wxCommandEvent &event);
 
 	// Grid events
 	void GridRightClickEvent(wxGridEvent &event);
@@ -159,17 +180,17 @@ private:
 	void ContextToggleGridlinesBottom(wxCommandEvent &event);
 	void ContextAutoScaleBottom(wxCommandEvent &event);
 	void ContextSetRangeBottom(wxCommandEvent &event);
-	void ContextSetLogarithmicBottom(wxCommandEvent &event);
 
 	void ContextToggleGridlinesLeft(wxCommandEvent &event);
 	void ContextAutoScaleLeft(wxCommandEvent &event);
 	void ContextSetRangeLeft(wxCommandEvent &event);
-	void ContextSetLogarithmicLeft(wxCommandEvent &event);
 
 	void ContextToggleGridlinesRight(wxCommandEvent &event);
 	void ContextAutoScaleRight(wxCommandEvent &event);
 	void ContextSetRangeRight(wxCommandEvent &event);
-	void ContextSetLogarithmicRight(wxCommandEvent &event);
+
+	// Other
+	void SplitterPositionChangedEvent(wxSplitterEvent &event);
 	// End event handlers-------------------------------------------------
 
 	void SetMarkerSize(const unsigned int &curve, const int &size);
@@ -188,6 +209,8 @@ private:
 
 	wxArrayString GetFileNameFromUser(wxString dialogTitle, wxString defaultDirectory,
 		wxString defaultFileName, wxString wildcard, long style);
+
+	void UpdatePlots(void);
 
 	DECLARE_EVENT_TABLE();
 };

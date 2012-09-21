@@ -113,6 +113,8 @@ public:
 	void SaveCurrentZoom(void);
 	void ClearZoomStack(void);
 
+	unsigned int GetCurveCount(void);
+
 private:
 	// Called from the PlotRenderer constructor only in order to initialize the display
 	void CreateActors(void);

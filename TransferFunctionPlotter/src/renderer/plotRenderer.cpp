@@ -2004,3 +2004,8 @@ void PlotRenderer::ProcessZoomBoxEnd(void)
 		SetRightYLimits(yRightMin, yRightMax);
 	}
 }
+
+unsigned int PlotRenderer::GetCurveCount(void)
+{
+	return plot->GetCurveCount();
+}

@@ -27,10 +27,10 @@
 // Description:		Main solving method for the tree.
 //
 // Input Arguments:
-//		expression		= wxString containing the expression to parse
+//		expression	= wxString containing the expression to parse
 //
 // Output Arguments:
-//		solvedData		= Dataset2D& containing the evaluated data
+//		solvedData	= Dataset2D& containing the evaluated data
 //
 // Return Value:
 //		wxString, empty for success, error string if unsuccessful

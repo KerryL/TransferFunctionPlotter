@@ -29,7 +29,6 @@
 #include "renderer/color.h"
 #include "utilities/dataset2D.h"
 #include "utilities/math/plotMath.h"
-#include "utilities/math/expressionTree.h"
 
 // *nix Icons
 #ifdef __WXGTK__
@@ -105,19 +104,37 @@ MainFrame::~MainFrame()
 void MainFrame::CreateControls(void)
 {
 	wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-	wxSplitterWindow *splitter = new wxSplitterWindow(this);
-	topSizer->Add(splitter, 1, wxGROW);
+	wxSplitterWindow *mainSplitter = new wxSplitterWindow(this);
+	topSizer->Add(mainSplitter, 1, wxGROW);
 
-	wxPanel *lowerPanel = new wxPanel(splitter);
+	wxPanel *lowerPanel = new wxPanel(mainSplitter);
 	wxBoxSizer *lowerSizer = new wxBoxSizer(wxHORIZONTAL);
 	lowerSizer->Add(CreateButtons(lowerPanel), 0, wxALL, 5);
 	lowerSizer->Add(CreateOptionsGrid(lowerPanel), 1, wxGROW | wxALL, 5);
 	lowerPanel->SetSizer(lowerSizer);
 
-	CreatePlotArea(splitter);
-	splitter->SplitHorizontally(plotArea, lowerPanel, plotArea->GetSize().GetHeight());
-	splitter->SetSashGravity(1.0);
-	splitter->SetMinimumPaneSize(150);
+	wxSplitterWindow *topSplitter = new wxSplitterWindow(mainSplitter);
+
+	selectedSplitter = new wxSplitterWindow(topSplitter, idPlotSplitter);
+	selectedAmplitudePlot = CreatePlotArea(selectedSplitter, _T("Amplitude (Selected Curve)"), _T("Amplitude [dB]"));
+	selectedPhasePlot = CreatePlotArea(selectedSplitter, _T("Phase (Selected Curve)"), _T("Phase [deg]"));
+	selectedSplitter->SplitHorizontally(selectedAmplitudePlot, selectedPhasePlot, selectedAmplitudePlot->GetSize().GetHeight());
+	selectedSplitter->SetSashGravity(0.5);
+
+	totalSplitter = new wxSplitterWindow(topSplitter, idPlotSplitter);
+	totalAmplitudePlot = CreatePlotArea(totalSplitter, _T("Amplitude (Total)"), _T("Amplitude [dB]"));
+	totalPhasePlot = CreatePlotArea(totalSplitter, _T("Phase (Total)"), _T("Phase [deg]"));
+	totalSplitter->SplitHorizontally(totalAmplitudePlot, totalPhasePlot, totalAmplitudePlot->GetSize().GetHeight());
+	totalSplitter->SetSashGravity(0.5);
+
+	SetXLabels();
+
+	topSplitter->SplitVertically(selectedSplitter, totalSplitter, selectedSplitter->GetSize().GetWidth());
+	topSplitter->SetSashGravity(0.5);
+
+	mainSplitter->SplitHorizontally(topSplitter, lowerPanel, selectedAmplitudePlot->GetSize().GetHeight() * 2);
+	mainSplitter->SetSashGravity(1.0);
+	mainSplitter->SetMinimumPaneSize(150);
 
 	SetSizerAndFit(topSizer);
 }
@@ -130,6 +147,8 @@ void MainFrame::CreateControls(void)
 //
 // Input Arguments:
 //		parent	= wxWindow*
+//		title	= const wxString&
+//		yLabel	= const wxString&
 //
 // Output Arguments:
 //		None
@@ -138,21 +157,23 @@ void MainFrame::CreateControls(void)
 //		PlotRenderer* pointing to plotArea
 //
 //==========================================================================
-PlotRenderer* MainFrame::CreatePlotArea(wxWindow *parent)
+PlotRenderer* MainFrame::CreatePlotArea(wxWindow *parent, const wxString &title, const wxString &yLabel)
 {
 #ifdef __WXGTK__
 	// Under GTK, we get a segmentation fault or X error on call to SwapBuffers in RenderWindow.
 	// Adding the double-buffer arugment fixes this.  Under windows, the double-buffer argument
 	// causes the colors to go funky.  So we have this #if.
 	int args[] = {WX_GL_DOUBLEBUFFER, 0};
-	plotArea = new PlotRenderer(parent, wxID_ANY, args, *this);
+	PlotRenderer *plotArea = new PlotRenderer(parent, wxID_ANY, args, *this);
 #else
-	plotArea = new PlotRenderer(parent, wxID_ANY, NULL, *this);
+	PlotRenderer *plotArea = new PlotRenderer(parent, wxID_ANY, NULL, *this);
 #endif
 
 	plotArea->SetMinSize(wxSize(650, 320));
 	plotArea->SetGridOn();
 	plotArea->SetXLogarithmic(true);
+	plotArea->SetTitle(title);
+	plotArea->SetLeftYLabel(yLabel);
 
 	return plotArea;
 }
@@ -161,7 +182,7 @@ PlotRenderer* MainFrame::CreatePlotArea(wxWindow *parent)
 // Class:			MainFrame
 // Function:		CreateButtons
 //
-// Description:		Creates and formats the options grid.
+// Description:		Creates buttons to add/remove transfer functions.
 //
 // Input Arguments:
 //		parent	= wxWindow*
@@ -170,7 +191,7 @@ PlotRenderer* MainFrame::CreatePlotArea(wxWindow *parent)
 //		None
 //
 // Return Value:
-//		wxGrid* pointing to optionsGrid
+//		wxSizer*
 //
 //==========================================================================
 wxSizer* MainFrame::CreateButtons(wxWindow *parent)
@@ -181,12 +202,64 @@ wxSizer* MainFrame::CreateButtons(wxWindow *parent)
 	wxButton *remove = new wxButton(parent, idRemoveButton, _T("Remove"));
 	wxButton *removeAll = new wxButton(parent, idRemoveAllButton, _T("Remove All"));
 
-	sizer->Add(add, 0, wxALL, 2);
-	sizer->Add(remove, 0, wxALL, 2);
-	sizer->Add(removeAll, 0, wxALL, 2);
+	sizer->Add(add, 1, wxGROW | wxALL, 2);
+	sizer->Add(remove, 1, wxGROW | wxALL, 2);
+	sizer->Add(removeAll, 1, wxGROW | wxALL, 2);
+
+	sizer->AddSpacer(10);
+	sizer->Add(CreateInputControls(parent));
 
 	wxStaticText *version = new wxStaticText(parent, wxID_ANY, TransferFunctionPlotterApp::versionString);
 	sizer->Add(version, 0, wxALL, 2);
+
+	return sizer;
+}
+
+//==========================================================================
+// Class:			MainFrame
+// Function:		CreateInputControls
+//
+// Description:		Creates additional input controls.
+//
+// Input Arguments:
+//		parent	= wxWindow*
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		wxSizer*
+//
+//==========================================================================
+wxSizer* MainFrame::CreateInputControls(wxWindow *parent)
+{
+	wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+
+	wxStaticText *freqUnitsLabel = new wxStaticText(parent, wxID_ANY, _T("Frequency Units:"));
+	frequencyUnitsHertzRadioButton = new wxRadioButton(parent, wxID_ANY, _T("Hz"));
+	wxRadioButton *frequencyUnitsRadRadioButton = new wxRadioButton(parent, wxID_ANY, _T("rad/sec"));
+	frequencyUnitsHertzRadioButton->SetValue(true);
+
+	sizer->Add(freqUnitsLabel, 0, wxALL, 2);
+	sizer->Add(frequencyUnitsHertzRadioButton, 0, wxALL, 2);
+	sizer->Add(frequencyUnitsRadRadioButton, 0, wxALL, 2);
+	sizer->AddSpacer(10);
+
+	wxStaticText *minFreqLabel = new wxStaticText(parent, wxID_ANY, _T("Min. Frequency"));
+	minFrequencyTextBox = new wxTextCtrl(parent, wxID_ANY, _T("0.1"));
+	wxStaticText *maxFreqLabel = new wxStaticText(parent, wxID_ANY, _T("Max. Frequency"));
+	maxFrequencyTextBox = new wxTextCtrl(parent, wxID_ANY, _T("100.0"));
+
+	minFrequencyTextBox->Connect(wxEVT_KILL_FOCUS, wxFocusEventHandler(MainFrame::TextBoxChangeEvent), NULL, this);
+	maxFrequencyTextBox->Connect(wxEVT_KILL_FOCUS, wxFocusEventHandler(MainFrame::TextBoxChangeEvent), NULL, this);
+
+	wxFlexGridSizer *gridSizer = new wxFlexGridSizer(2, 5, 5);
+	gridSizer->Add(minFreqLabel);
+	gridSizer->Add(minFrequencyTextBox);
+	gridSizer->Add(maxFreqLabel);
+	gridSizer->Add(maxFrequencyTextBox);
+
+	sizer->Add(gridSizer, 0, wxALL, 2);
 
 	return sizer;
 }
@@ -299,6 +372,9 @@ void MainFrame::SetProperties(void)
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	// Buttons
 	EVT_BUTTON(idAddButton,							MainFrame::AddButtonClicked)
+	EVT_BUTTON(idRemoveAllButton,					MainFrame::RemoveAllButtonClicked)
+
+	EVT_RADIOBUTTON(wxID_ANY,						MainFrame::RadioButtonChangeEvent)
 
 	// Grid control
 	EVT_GRID_CELL_RIGHT_CLICK(MainFrame::GridRightClickEvent)
@@ -315,16 +391,16 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(idPlotContextGridColor,				MainFrame::ContextGridColor)
 
 	EVT_MENU(idPlotContextToggleBottomGridlines,	MainFrame::ContextToggleGridlinesBottom)
-	EVT_MENU(idPlotContextSetBottomLogarithmic,		MainFrame::ContextSetLogarithmicBottom)
 	EVT_MENU(idPlotContextAutoScaleBottom,			MainFrame::ContextAutoScaleBottom)
 
 	EVT_MENU(idPlotContextToggleLeftGridlines,		MainFrame::ContextToggleGridlinesLeft)
-	EVT_MENU(idPlotContextSetLeftLogarithmic,		MainFrame::ContextSetLogarithmicLeft)
 	EVT_MENU(idPlotContextAutoScaleLeft,			MainFrame::ContextAutoScaleLeft)
 
 	EVT_MENU(idPlotContextToggleRightGridlines,		MainFrame::ContextToggleGridlinesRight)
-	EVT_MENU(idPlotContextSetRightLogarithmic,		MainFrame::ContextSetLogarithmicRight)
 	EVT_MENU(idPlotContextAutoScaleRight,			MainFrame::ContextAutoScaleRight)
+
+	// Other
+	EVT_SPLITTER_SASH_POS_CHANGED(idPlotSplitter,	MainFrame::SplitterPositionChangedEvent)
 END_EVENT_TABLE();
 
 //==========================================================================
@@ -352,7 +428,7 @@ void MainFrame::ContextWriteImageFile(wxCommandEvent& WXUNUSED(event))
 	if (pathAndFileName.IsEmpty())
 		return;
 
-	plotArea->WriteImageToFile(pathAndFileName[0]);
+	//plotArea->WriteImageToFile(pathAndFileName[0]);// FIXME:  Re-implement
 }
 
 //==========================================================================
@@ -402,27 +478,50 @@ wxArrayString MainFrame::GetFileNameFromUser(wxString dialogTitle, wxString defa
 	return pathsAndFileNames;
 }
 
+//==========================================================================
+// Class:			MainFrame
+// Function:		AddButtonClicked
+//
+// Description:		Displays the add transfer function dialog.
+//
+// Input Arguments:
+//		event	= wxCommandEvent& (unused)
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
 void MainFrame::AddButtonClicked(wxCommandEvent& WXUNUSED(event))
 {
 	wxString s = wxGetTextFromUser(_T("Specify Transfer Function"));
-	ExpressionTree e;
-	Dataset2D *magnitude = new Dataset2D;
-	Dataset2D *phase = new Dataset2D;
-	wxString r = e.Solve(s, 0.1, 1000.0, 1000, *magnitude, *phase);
-	if (!r.IsEmpty())
-	{
-		wxMessageBox(r);
-		delete magnitude;
-		delete phase;
-		return;
-	}
-	AddCurve(magnitude, s + _T("; Magnitude [dB]"));
-	AddCurve(phase, s + _T("; Phase [deg]"), true);
+	if (!s.IsEmpty())
+		AddCurve(s);
 }
 
+//==========================================================================
+// Class:			MainFrame
+// Function:		RemoveAllButtonClicked
+//
+// Description:		Removes all plots.
+//
+// Input Arguments:
+//		event	= wxCommandEvent& (unused)
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
 void MainFrame::RemoveAllButtonClicked(wxCommandEvent& WXUNUSED(event))
 {
+	optionsGrid->DeleteRows(0, optionsGrid->GetNumberRows());
 	ClearAllCurves();
+	UpdatePlots();
 }
 
 //==========================================================================
@@ -473,17 +572,14 @@ void MainFrame::CreatePlotContextMenu(const wxPoint &position, const PlotContext
 	{
 	case plotContextXAxis:
 		contextMenu = CreateAxisContextMenu(idPlotContextToggleBottomGridlines);
-		contextMenu->Check(idPlotContextSetBottomLogarithmic, plotArea->GetXLogarithmic());
 		break;
 
 	case plotContextLeftYAxis:
 		contextMenu = CreateAxisContextMenu(idPlotContextToggleLeftGridlines);
-		contextMenu->Check(idPlotContextSetLeftLogarithmic, plotArea->GetLeftLogarithmic());
 		break;
 
 	case plotContextRightYAxis:
 		contextMenu = CreateAxisContextMenu(idPlotContextToggleRightGridlines);
-		contextMenu->Check(idPlotContextSetRightLogarithmic, plotArea->GetRightLogarithmic());
 		break;
 
 	default:
@@ -549,7 +645,6 @@ wxMenu* MainFrame::CreateAxisContextMenu(const unsigned int &baseEventId) const
 
 	contextMenu->Append(baseEventId, _T("Toggle Axis Gridlines"));
 	contextMenu->Append(baseEventId + 1, _T("Auto Scale Axis"));
-	contextMenu->AppendCheckItem(baseEventId + 2, _T("Logarithmic Scale"));
 
 	return contextMenu;
 }
@@ -572,8 +667,14 @@ wxMenu* MainFrame::CreateAxisContextMenu(const unsigned int &baseEventId) const
 //==========================================================================
 void MainFrame::ClearAllCurves(void)
 {
-	while (plotList.GetCount() > 0)
-		RemoveCurve(0);
+	dataManager.RemoveAllTransferFunctions();
+
+	selectedAmplitudePlot->RemoveAllCurves();
+	selectedPhasePlot->RemoveAllCurves();
+	totalAmplitudePlot->RemoveAllCurves();
+	totalPhasePlot->RemoveAllCurves();
+
+	UpdatePlots();
 }
 
 //==========================================================================
@@ -593,9 +694,10 @@ void MainFrame::ClearAllCurves(void)
 //		None
 //
 //==========================================================================
-void MainFrame::AddCurve(Dataset2D *data, wxString name, const bool &rightAxis)
+void MainFrame::AddCurve(wxString name)
 {
-	plotList.Add(data);
+	if (!dataManager.AddTransferFunction(name))
+		return;
 
 	optionsGrid->BeginBatch();
 	if (optionsGrid->GetNumberRows() == 0)
@@ -603,9 +705,22 @@ void MainFrame::AddCurve(Dataset2D *data, wxString name, const bool &rightAxis)
 	unsigned int index = AddDataRowToGrid(name);
 	optionsGrid->EndBatch();
 
-	plotArea->AddCurve(*data);
-	UpdateCurveProperties(index - 1, GetNextColor(index), true, rightAxis);
-	plotArea->UpdateDisplay();
+	if (totalAmplitudePlot->GetCurveCount() == 0)
+	{
+		totalAmplitudePlot->AddCurve(*dataManager.GetTotalAmplitudeData());
+		totalPhasePlot->AddCurve(*dataManager.GetTotalPhaseData());
+	}
+
+	UpdateSelectedTransferFunction(index - 1);
+	UpdateCurveProperties(index - 1, GetNextColor(index), true, false);
+}
+
+void MainFrame::UpdateSelectedTransferFunction(const unsigned int &i)
+{
+	//selectedAmplitudePlot->RemoveAllCurves();
+	//selectedPhasePlot->RemoveAllCurves();
+	selectedAmplitudePlot->AddCurve(*dataManager.GetAmplitudeData(i));
+	selectedPhasePlot->AddCurve(*dataManager.GetPhaseData(i));
 }
 
 //==========================================================================
@@ -761,8 +876,17 @@ void MainFrame::RemoveCurve(const unsigned int &i)
 
 	optionsGrid->AutoSizeColumns();
 
-	plotArea->RemoveCurve(i);
-	plotList.Remove(i);
+	dataManager.RemoveTransferFunctions(i);
+	if (dataManager.GetCount() == 0)
+	{
+		selectedAmplitudePlot->RemoveAllCurves();
+		selectedPhasePlot->RemoveAllCurves();
+		totalAmplitudePlot->RemoveAllCurves();
+		totalPhasePlot->RemoveAllCurves();
+	}
+	else
+		UpdateSelectedTransferFunction(0);
+	UpdatePlots();
 }
 
 //==========================================================================
@@ -924,7 +1048,11 @@ void MainFrame::UpdateCurveProperties(const unsigned int &index, const Color &co
 	long markerSize;
 	optionsGrid->GetCellValue(index + 1, colLineSize).ToULong(&lineSize);
 	optionsGrid->GetCellValue(index + 1, colMarkerSize).ToLong(&markerSize);
-	plotArea->SetCurveProperties(index, color, visible, rightAxis, lineSize, markerSize);
+	selectedAmplitudePlot->SetCurveProperties(index, color, visible, rightAxis, lineSize, markerSize);
+	selectedPhasePlot->SetCurveProperties(index, color, visible, rightAxis, lineSize, markerSize);
+
+	totalAmplitudePlot->SetCurveProperties(0, Color::ColorBlue, true, false, 1, 0);
+	totalPhasePlot->SetCurveProperties(0, Color::ColorBlue, true, false, 1, 0);
 }
 
 //==========================================================================
@@ -973,12 +1101,22 @@ void MainFrame::GridCellChangeEvent(wxGridEvent &event)
 //==========================================================================
 void MainFrame::ContextToggleGridlines(wxCommandEvent& WXUNUSED(event))
 {
-	if (plotArea->GetGridOn())
-		plotArea->SetGridOff();
+	if (selectedAmplitudePlot->GetGridOn())
+	{
+		selectedAmplitudePlot->SetGridOff();
+		selectedPhasePlot->SetGridOff();
+		totalAmplitudePlot->SetGridOff();
+		totalPhasePlot->SetGridOff();
+	}
 	else
-		plotArea->SetGridOn();
+	{
+		selectedAmplitudePlot->SetGridOn();
+		selectedPhasePlot->SetGridOn();
+		totalAmplitudePlot->SetGridOn();
+		totalPhasePlot->SetGridOn();
+	}
 
-	plotArea->UpdateDisplay();
+	UpdatePlots();
 }
 
 //==========================================================================
@@ -999,8 +1137,12 @@ void MainFrame::ContextToggleGridlines(wxCommandEvent& WXUNUSED(event))
 //==========================================================================
 void MainFrame::ContextAutoScale(wxCommandEvent& WXUNUSED(event))
 {
-	plotArea->AutoScale();
-	plotArea->UpdateDisplay();
+	selectedAmplitudePlot->AutoScale();
+	selectedPhasePlot->AutoScale();
+	totalAmplitudePlot->AutoScale();
+	totalPhasePlot->AutoScale();
+
+	UpdatePlots();
 }
 
 //==========================================================================
@@ -1034,7 +1176,7 @@ void MainFrame::UpdateCursorValues(const bool &leftVisible, const bool &rightVis
 	// TODO:  This would be nicer with smart precision so we show enough digits but not too many
 
 	// For each curve, update the cursor values
-	int i;
+	/*int i;
 	for (i = 1; i < optionsGrid->GetRows(); i++)
 	{
 		UpdateSingleCursorValue(i, leftValue, colLeftCursor, leftVisible);
@@ -1048,7 +1190,7 @@ void MainFrame::UpdateCursorValues(const bool &leftVisible, const bool &rightVis
 			optionsGrid->SetCellValue(i, colDifference, wxString::Format("%f", right - left));
 			optionsGrid->SetCellValue(0, colDifference, wxString::Format("%f", rightValue - leftValue));
 		}
-	}
+	}*/
 }
 
 //==========================================================================
@@ -1072,7 +1214,7 @@ void MainFrame::UpdateCursorValues(const bool &leftVisible, const bool &rightVis
 void MainFrame::UpdateSingleCursorValue(const unsigned int &row,
 	double value, const unsigned int &column, const bool &isVisible)
 {
-	if (isVisible)
+	/*if (isVisible)
 	{
 		optionsGrid->SetCellValue(0, column, wxString::Format("%f", value));
 
@@ -1089,7 +1231,7 @@ void MainFrame::UpdateSingleCursorValue(const unsigned int &row,
 		// The difference column only exists if both cursors are visible
 		optionsGrid->SetCellValue(0, colDifference, wxEmptyString);
 		optionsGrid->SetCellValue(row, colDifference, wxEmptyString);
-	}
+	}*/
 }
 
 //==========================================================================
@@ -1114,18 +1256,18 @@ bool MainFrame::GetCurrentAxisRange(const PlotContext &axis, double &min, double
 	switch (axis)
 	{
 	case plotContextXAxis:
-		min = plotArea->GetXMin();
-		max = plotArea->GetXMax();
+		min = selectedAmplitudePlot->GetXMin();
+		max = selectedAmplitudePlot->GetXMax();
 		break;
 
 	case plotContextLeftYAxis:
-		min = plotArea->GetLeftYMin();
-		max = plotArea->GetLeftYMax();
+		min = selectedAmplitudePlot->GetLeftYMin();
+		max = selectedAmplitudePlot->GetLeftYMax();
 		break;
 
 	case plotContextRightYAxis:
-		min = plotArea->GetRightYMin();
-		max = plotArea->GetRightYMax();
+		min = selectedAmplitudePlot->GetRightYMin();
+		max = selectedAmplitudePlot->GetRightYMax();
 		break;
 
 	default:
@@ -1160,19 +1302,28 @@ void MainFrame::SetNewAxisRange(const PlotContext &axis, const double &min, cons
 	switch (axis)
 	{
 	case plotContextLeftYAxis:
-		plotArea->SetLeftYLimits(min, max);
+		selectedAmplitudePlot->SetLeftYLimits(min, max);
+		selectedPhasePlot->SetLeftYLimits(min, max);
+		totalAmplitudePlot->SetLeftYLimits(min, max);
+		totalPhasePlot->SetLeftYLimits(min, max);
 		break;
 
 	case plotContextRightYAxis:
-		plotArea->SetRightYLimits(min, max);
+		selectedAmplitudePlot->SetRightYLimits(min, max);
+		selectedPhasePlot->SetRightYLimits(min, max);
+		totalAmplitudePlot->SetRightYLimits(min, max);
+		totalPhasePlot->SetRightYLimits(min, max);
 		break;
 
 	default:
 	case plotContextXAxis:
-		plotArea->SetXLimits(min, max);
+		selectedAmplitudePlot->SetXLimits(min, max);
+		selectedPhasePlot->SetXLimits(min, max);
+		totalAmplitudePlot->SetXLimits(min, max);
+		totalPhasePlot->SetXLimits(min, max);
 	}
 
-	plotArea->UpdateDisplay();
+	UpdatePlots();
 }
 
 //==========================================================================
@@ -1193,7 +1344,10 @@ void MainFrame::SetNewAxisRange(const PlotContext &axis, const double &min, cons
 //==========================================================================
 void MainFrame::ContextToggleGridlinesBottom(wxCommandEvent& WXUNUSED(event))
 {
-	plotArea->SetBottomGrid(!plotArea->GetBottomGrid());
+	selectedAmplitudePlot->SetBottomGrid(!selectedAmplitudePlot->GetBottomGrid());
+	selectedPhasePlot->SetBottomGrid(!selectedPhasePlot->GetBottomGrid());
+	totalAmplitudePlot->SetBottomGrid(!totalAmplitudePlot->GetBottomGrid());
+	totalPhasePlot->SetBottomGrid(!totalPhasePlot->GetBottomGrid());
 }
 
 //==========================================================================
@@ -1214,7 +1368,10 @@ void MainFrame::ContextToggleGridlinesBottom(wxCommandEvent& WXUNUSED(event))
 //==========================================================================
 void MainFrame::ContextAutoScaleBottom(wxCommandEvent& WXUNUSED(event))
 {
-	plotArea->AutoScaleBottom();
+	selectedAmplitudePlot->AutoScaleBottom();
+	selectedPhasePlot->AutoScaleBottom();
+	totalAmplitudePlot->AutoScaleBottom();
+	totalPhasePlot->AutoScaleBottom();
 }
 
 //==========================================================================
@@ -1235,7 +1392,10 @@ void MainFrame::ContextAutoScaleBottom(wxCommandEvent& WXUNUSED(event))
 //==========================================================================
 void MainFrame::ContextToggleGridlinesLeft(wxCommandEvent& WXUNUSED(event))
 {
-	plotArea->SetLeftGrid(!plotArea->GetLeftGrid());
+	selectedAmplitudePlot->SetLeftGrid(!selectedAmplitudePlot->GetLeftGrid());
+	selectedPhasePlot->SetLeftGrid(!selectedPhasePlot->GetLeftGrid());
+	totalAmplitudePlot->SetLeftGrid(!totalAmplitudePlot->GetLeftGrid());
+	totalPhasePlot->SetLeftGrid(!totalPhasePlot->GetLeftGrid());
 }
 
 //==========================================================================
@@ -1256,7 +1416,10 @@ void MainFrame::ContextToggleGridlinesLeft(wxCommandEvent& WXUNUSED(event))
 //==========================================================================
 void MainFrame::ContextAutoScaleLeft(wxCommandEvent& WXUNUSED(event))
 {
-	plotArea->AutoScaleLeft();
+	selectedAmplitudePlot->AutoScaleLeft();
+	selectedPhasePlot->AutoScaleLeft();
+	totalAmplitudePlot->AutoScaleLeft();
+	totalPhasePlot->AutoScaleLeft();
 }
 
 //==========================================================================
@@ -1277,7 +1440,10 @@ void MainFrame::ContextAutoScaleLeft(wxCommandEvent& WXUNUSED(event))
 //==========================================================================
 void MainFrame::ContextToggleGridlinesRight(wxCommandEvent& WXUNUSED(event))
 {
-	plotArea->SetRightGrid(!plotArea->GetRightGrid());
+	selectedAmplitudePlot->SetRightGrid(!selectedAmplitudePlot->GetRightGrid());
+	selectedPhasePlot->SetRightGrid(!selectedPhasePlot->GetRightGrid());
+	totalAmplitudePlot->SetRightGrid(!totalAmplitudePlot->GetRightGrid());
+	totalPhasePlot->SetRightGrid(!totalPhasePlot->GetRightGrid());
 }
 
 //==========================================================================
@@ -1298,7 +1464,10 @@ void MainFrame::ContextToggleGridlinesRight(wxCommandEvent& WXUNUSED(event))
 //==========================================================================
 void MainFrame::ContextAutoScaleRight(wxCommandEvent& WXUNUSED(event))
 {
-	plotArea->AutoScaleRight();
+	selectedAmplitudePlot->AutoScaleRight();
+	selectedPhasePlot->AutoScaleRight();
+	totalAmplitudePlot->AutoScaleRight();
+	totalPhasePlot->AutoScaleRight();
 }
 
 //==========================================================================
@@ -1321,7 +1490,7 @@ void MainFrame::ContextAutoScaleRight(wxCommandEvent& WXUNUSED(event))
 void MainFrame::ContextPlotBGColor(wxCommandEvent& WXUNUSED(event))
 {
 	wxColourData colorData;
-	colorData.SetColour(plotArea->GetBackgroundColor().ToWxColor());
+	colorData.SetColour(selectedAmplitudePlot->GetBackgroundColor().ToWxColor());
 
 	wxColourDialog dialog(this, &colorData);
 	dialog.CenterOnParent();
@@ -1330,8 +1499,13 @@ void MainFrame::ContextPlotBGColor(wxCommandEvent& WXUNUSED(event))
     {
 		Color color;
 		color.Set(dialog.GetColourData().GetColour());
-		plotArea->SetBackgroundColor(color);
-		plotArea->UpdateDisplay();
+
+		selectedAmplitudePlot->SetBackgroundColor(color);
+		selectedPhasePlot->SetBackgroundColor(color);
+		totalAmplitudePlot->SetBackgroundColor(color);
+		totalPhasePlot->SetBackgroundColor(color);
+
+		UpdatePlots();
 	}
 }
 
@@ -1355,7 +1529,7 @@ void MainFrame::ContextPlotBGColor(wxCommandEvent& WXUNUSED(event))
 void MainFrame::ContextGridColor(wxCommandEvent& WXUNUSED(event))
 {
 	wxColourData colorData;
-	colorData.SetColour(plotArea->GetGridColor().ToWxColor());
+	colorData.SetColour(selectedAmplitudePlot->GetGridColor().ToWxColor());
 
 	wxColourDialog dialog(this, &colorData);
 	dialog.CenterOnParent();
@@ -1364,75 +1538,14 @@ void MainFrame::ContextGridColor(wxCommandEvent& WXUNUSED(event))
     {
 		Color color;
 		color.Set(dialog.GetColourData().GetColour());
-		plotArea->SetGridColor(color);
-		plotArea->UpdateDisplay();
+
+		selectedAmplitudePlot->SetGridColor(color);
+		selectedPhasePlot->SetGridColor(color);
+		totalAmplitudePlot->SetGridColor(color);
+		totalPhasePlot->SetGridColor(color);
+
+		UpdatePlots();
 	}
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextSetLogarithmicBottom
-//
-// Description:		Event handler for right Y-axis context menu Set Logarithmic event.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextSetLogarithmicBottom(wxCommandEvent& WXUNUSED(event))
-{
-	plotArea->SetXLogarithmic(!plotArea->GetXLogarithmic());
-	plotArea->ClearZoomStack();
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextSetLogarithmicLeft
-//
-// Description:		Event handler for right Y-axis context menu Set Logarithmic event.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextSetLogarithmicLeft(wxCommandEvent& WXUNUSED(event))
-{
-	plotArea->SetLeftLogarithmic(!plotArea->GetLeftLogarithmic());
-	plotArea->ClearZoomStack();
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextSetLogarithmicRight
-//
-// Description:		Event handler for right Y-axis context menu Set Logarithmic event.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextSetLogarithmicRight(wxCommandEvent& WXUNUSED(event))
-{
-	plotArea->SetRightLogarithmic(!plotArea->GetRightLogarithmic());
-	plotArea->ClearZoomStack();
 }
 
 //==========================================================================
@@ -1456,4 +1569,123 @@ void MainFrame::SetMarkerSize(const unsigned int &curve, const int &size)
 {
 	optionsGrid->SetCellValue(curve + 1, colMarkerSize, wxString::Format("%i", size));
 	UpdateCurveProperties(curve);
+}
+
+//==========================================================================
+// Class:			MainFrame
+// Function:		SetXLabels
+//
+// Description:		Sets the x-label for all four plots depending on selected
+//					frequency units.
+//
+// Input Arguments:
+//		None
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
+void MainFrame::SetXLabels(void)
+{
+	if (frequencyUnitsHertzRadioButton->GetValue())
+	{
+		selectedAmplitudePlot->SetXLabel(_T("Frequency [Hz]"));
+		selectedPhasePlot->SetXLabel(_T("Frequency [Hz]"));
+		totalAmplitudePlot->SetXLabel(_T("Frequency [Hz]"));
+		totalPhasePlot->SetXLabel(_T("Frequency [Hz]"));
+	}
+	else
+	{
+		selectedAmplitudePlot->SetXLabel(_T("Frequency [rad/sec]"));
+		selectedPhasePlot->SetXLabel(_T("Frequency [rad/sec]"));
+		totalAmplitudePlot->SetXLabel(_T("Frequency [rad/sec]"));
+		totalPhasePlot->SetXLabel(_T("Frequency [rad/sec]"));
+	}
+}
+
+//==========================================================================
+// Class:			MainFrame
+// Function:		TextBoxChangeEvent
+//
+// Description:		Event handler for text box change (really loss of focus)
+//					events.
+//
+// Input Arguments:
+//		event	= wxFocusEvent& (unused)
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
+void MainFrame::TextBoxChangeEvent(wxFocusEvent& WXUNUSED(event))
+{
+	double min, max;
+	if (minFrequencyTextBox->GetValue().ToDouble(&min) &&
+		maxFrequencyTextBox->GetValue().ToDouble(&max))
+		dataManager.SetFrequencyRange(min, max);
+	UpdatePlots();
+}
+
+//==========================================================================
+// Class:			MainFrame
+// Function:		RadioButtonChangeEvent
+//
+// Description:		Event handler for radio button change events.
+//
+// Input Arguments:
+//		event	= wxCommandEvent& (unused)
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
+void MainFrame::RadioButtonChangeEvent(wxCommandEvent& WXUNUSED(event))
+{
+	SetXLabels();
+	if (frequencyUnitsHertzRadioButton->GetValue())
+		dataManager.SetFrequencyUnitsHertz();
+	else
+		dataManager.SetFrequencyUnitsRadPerSec();
+	UpdatePlots();
+}
+
+//==========================================================================
+// Class:			MainFrame
+// Function:		SplitterPositionChangedEvent
+//
+// Description:		Ensures that the opposite horizontal sash moves with the
+//					one actually being dragged by the user.
+//
+// Input Arguments:
+//		event	= wxSplitterEvent&
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
+void MainFrame::SplitterPositionChangedEvent(wxSplitterEvent &event)
+{
+	// FIXME:  On resize, this screws up the effects of sash gravity that we like
+	selectedSplitter->SetSashPosition(event.GetSashPosition());
+	totalSplitter->SetSashPosition(event.GetSashPosition());
+}
+
+void MainFrame::UpdatePlots(void)
+{
+	selectedAmplitudePlot->UpdateDisplay();
+	selectedPhasePlot->UpdateDisplay();
+	totalAmplitudePlot->UpdateDisplay();
+	totalPhasePlot->UpdateDisplay();
 }
