@@ -15,6 +15,10 @@
 //				 all TFs).
 // History:
 
+// Standard C++ headers
+#include <vector>
+#include <utility>
+
 // wxWidgets headers
 #include <wx/wx.h>
 
@@ -27,7 +31,8 @@ class DataManager
 public:
 	DataManager();
 
-	bool AddTransferFunction(const wxString &tf);
+	bool AddTransferFunction(const wxString &numerator, const wxString &denominator);
+	bool UpdateTransferFunction(const unsigned int &i, const wxString &numerator, const wxString &denominator);
 
 	void SetFrequencyUnitsHertz(void);
 	void SetFrequencyUnitsRadPerSec(void);
@@ -37,6 +42,9 @@ public:
 	Dataset2D* GetPhaseData(const unsigned int &i) { return phasePlots[i]; };
 	Dataset2D* GetTotalAmplitudeData(void) { return &totalAmplitude; };
 	Dataset2D* GetTotalPhaseData(void) { return &totalPhase; };
+
+	wxString GetNumerator(const unsigned int &i) const { return transferFunctions[i].first; };
+	wxString GetDenominator(const unsigned int &i) const { return transferFunctions[i].second; };
 
 	unsigned int GetCount(void) { return amplitudePlots.GetCount(); };
 
@@ -53,8 +61,11 @@ private:
 	Dataset2D totalAmplitude;
 	Dataset2D totalPhase;
 
-	wxArrayString transferFunctions;
+	std::vector<std::pair<wxString, wxString> > transferFunctions;
 	wxString ConstructTotalTransferFunction(void) const;
 	void UpdateTotalTransferFunctionData(void);
 	void UpdateAllTransferFunctionData(void);
+
+	wxString AssembleTransferFunctionString(const wxString &numerator, const wxString &denominator) const;
+	wxString AssembleTransferFunctionString(const std::pair<wxString, wxString> &tf) const;
 };

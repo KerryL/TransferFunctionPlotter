@@ -103,6 +103,11 @@ bool ExpressionTree::ParenthesesBalanced(const wxString &expression) const
 	return true;
 }
 
+wxString ExpressionTree::CheckExpression(wxString expression)
+{
+	return ParseExpression(expression);
+}
+
 //==========================================================================
 // Class:			ExpressionTree
 // Function:		ParseExpression

@@ -176,8 +176,8 @@ void PlotObject::InitializeFonts(void)
 //==========================================================================
 void PlotObject::CreateFontObjects(const wxString &fontFile)
 {
-	axisFont = new FTGLTextureFont(fontFile.c_str());
-	titleFont = new FTGLTextureFont(fontFile.c_str());
+	axisFont = new FTGLTextureFont(fontFile.mb_str());
+	titleFont = new FTGLTextureFont(fontFile.mb_str());
 
 	if (axisFont->Error())
 	{
@@ -502,7 +502,7 @@ void PlotObject::FormatTopBasics(const Axis::TickStyle &tickStyle)
 		axisTop->SetOffsetFromWindowEdge(75);
 
 	if (!titleObject->GetText().IsEmpty())
-		axisTop->SetOffsetFromWindowEdge(axisTop->GetOffsetFromWindowEdge() + titleObject->GetTextHeight());
+		axisTop->SetOffsetFromWindowEdge(axisTop->GetOffsetFromWindowEdge() + 15);
 }
 
 //==========================================================================

@@ -46,14 +46,15 @@ public:
 	void SetPosition(double _x, double _y) { x = _x; y = _y; modified = true; };
 	void SetCentered(bool _centered) { centered = _centered; modified = true; };
 
-	double GetTextHeight(void) const;
-	double GetTextWidth(void) const;
-
 	wxString GetText(void) const { return text; };
 
 private:
 	// The angle at which this text is inclined
 	double angle;// 0 is horizontal, angle builds counter-clockwise about an axis out of the screen
+
+	// For some reason, calling these other than when we're rendering can cause issues
+	double GetTextHeight(void) const;
+	double GetTextWidth(void) const;
 
 	// The actual text content and font
 	wxString text;

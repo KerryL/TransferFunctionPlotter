@@ -25,6 +25,7 @@
 // Local headers
 #include "application/mainFrame.h"
 #include "application/plotterApp.h"
+#include "application/tfDialog.h"
 #include "renderer/plotRenderer.h"
 #include "renderer/color.h"
 #include "utilities/dataset2D.h"
@@ -113,30 +114,28 @@ void MainFrame::CreateControls(void)
 	lowerSizer->Add(CreateOptionsGrid(lowerPanel), 1, wxGROW | wxALL, 5);
 	lowerPanel->SetSizer(lowerSizer);
 
-	wxSplitterWindow *topSplitter = new wxSplitterWindow(mainSplitter);
+	wxWindow *upperPanel = new wxPanel(mainSplitter);
+	selectedAmplitudePlot = CreatePlotArea(upperPanel, _T("Amplitude"), _T("Amplitude [dB]"));
+	selectedPhasePlot = CreatePlotArea(upperPanel, _T("Phase"), _T("Phase [deg]"));
+	totalAmplitudePlot = CreatePlotArea(upperPanel, _T("Amplitude (Total)"), _T("Amplitude [dB]"));
+	totalPhasePlot = CreatePlotArea(upperPanel, _T("Phase (Total)"), _T("Phase [deg]"));
 
-	selectedSplitter = new wxSplitterWindow(topSplitter, idPlotSplitter);
-	selectedAmplitudePlot = CreatePlotArea(selectedSplitter, _T("Amplitude (Selected Curve)"), _T("Amplitude [dB]"));
-	selectedPhasePlot = CreatePlotArea(selectedSplitter, _T("Phase (Selected Curve)"), _T("Phase [deg]"));
-	selectedSplitter->SplitHorizontally(selectedAmplitudePlot, selectedPhasePlot, selectedAmplitudePlot->GetSize().GetHeight());
-	selectedSplitter->SetSashGravity(0.5);
-
-	totalSplitter = new wxSplitterWindow(topSplitter, idPlotSplitter);
-	totalAmplitudePlot = CreatePlotArea(totalSplitter, _T("Amplitude (Total)"), _T("Amplitude [dB]"));
-	totalPhasePlot = CreatePlotArea(totalSplitter, _T("Phase (Total)"), _T("Phase [deg]"));
-	totalSplitter->SplitHorizontally(totalAmplitudePlot, totalPhasePlot, totalAmplitudePlot->GetSize().GetHeight());
-	totalSplitter->SetSashGravity(0.5);
+	wxGridSizer *upperSizer = new wxGridSizer(2,0,0);
+	upperSizer->Add(selectedAmplitudePlot, 1, wxGROW);
+	upperSizer->Add(totalAmplitudePlot, 1, wxGROW);
+	upperSizer->Add(selectedPhasePlot, 1, wxGROW);
+	upperSizer->Add(totalPhasePlot, 1, wxGROW);
+	upperPanel->SetSizer(upperSizer);
 
 	SetXLabels();
 
-	topSplitter->SplitVertically(selectedSplitter, totalSplitter, selectedSplitter->GetSize().GetWidth());
-	topSplitter->SetSashGravity(0.5);
-
-	mainSplitter->SplitHorizontally(topSplitter, lowerPanel, selectedAmplitudePlot->GetSize().GetHeight() * 2);
+	mainSplitter->SplitHorizontally(upperPanel, lowerPanel, 500);
+	mainSplitter->SetSize(GetClientSize());
 	mainSplitter->SetSashGravity(1.0);
-	mainSplitter->SetMinimumPaneSize(150);
+	mainSplitter->SetMinimumPaneSize(250);
 
 	SetSizerAndFit(topSizer);
+	mainSplitter->SetSashPosition(mainSplitter->GetSashPosition(), false);
 }
 
 //==========================================================================
@@ -372,6 +371,7 @@ void MainFrame::SetProperties(void)
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	// Buttons
 	EVT_BUTTON(idAddButton,							MainFrame::AddButtonClicked)
+	EVT_BUTTON(idRemoveButton,						MainFrame::RemoveButtonClicked)
 	EVT_BUTTON(idRemoveAllButton,					MainFrame::RemoveAllButtonClicked)
 
 	EVT_RADIOBUTTON(wxID_ANY,						MainFrame::RadioButtonChangeEvent)
@@ -398,9 +398,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 
 	EVT_MENU(idPlotContextToggleRightGridlines,		MainFrame::ContextToggleGridlinesRight)
 	EVT_MENU(idPlotContextAutoScaleRight,			MainFrame::ContextAutoScaleRight)
-
-	// Other
-	EVT_SPLITTER_SASH_POS_CHANGED(idPlotSplitter,	MainFrame::SplitterPositionChangedEvent)
 END_EVENT_TABLE();
 
 //==========================================================================
@@ -496,9 +493,41 @@ wxArrayString MainFrame::GetFileNameFromUser(wxString dialogTitle, wxString defa
 //==========================================================================
 void MainFrame::AddButtonClicked(wxCommandEvent& WXUNUSED(event))
 {
-	wxString s = wxGetTextFromUser(_T("Specify Transfer Function"));
-	if (!s.IsEmpty())
-		AddCurve(s);
+	TFDialog dialog = new TFDialog(this);
+	if (dialog.ShowModal() != wxID_OK)
+		return;
+
+	AddCurve(dialog.GetNumerator(), dialog.GetDenominator());
+}
+
+//==========================================================================
+// Class:			MainFrame
+// Function:		RemoveButtonClicked
+//
+// Description:		Removes selected plot.
+//
+// Input Arguments:
+//		event	= wxCommandEvent& (unused)
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
+void MainFrame::RemoveButtonClicked(wxCommandEvent &event)
+{
+	wxArrayInt selection = optionsGrid->GetSelectedRows();
+	unsigned int i;
+	for (i = 0; i < selection.Count(); i++)
+	{
+		if (selection[i] == 0)
+			continue;
+		RemoveCurve(selection[i] - 1);
+	}
+
+	UpdatePlots();
 }
 
 //==========================================================================
@@ -519,7 +548,6 @@ void MainFrame::AddButtonClicked(wxCommandEvent& WXUNUSED(event))
 //==========================================================================
 void MainFrame::RemoveAllButtonClicked(wxCommandEvent& WXUNUSED(event))
 {
-	optionsGrid->DeleteRows(0, optionsGrid->GetNumberRows());
 	ClearAllCurves();
 	UpdatePlots();
 }
@@ -667,12 +695,9 @@ wxMenu* MainFrame::CreateAxisContextMenu(const unsigned int &baseEventId) const
 //==========================================================================
 void MainFrame::ClearAllCurves(void)
 {
-	dataManager.RemoveAllTransferFunctions();
-
-	selectedAmplitudePlot->RemoveAllCurves();
-	selectedPhasePlot->RemoveAllCurves();
-	totalAmplitudePlot->RemoveAllCurves();
-	totalPhasePlot->RemoveAllCurves();
+	unsigned int i;
+	for (i = dataManager.GetCount(); i > 0; i--)
+		RemoveCurve(i - 1);
 
 	UpdatePlots();
 }
@@ -681,11 +706,11 @@ void MainFrame::ClearAllCurves(void)
 // Class:			MainFrame
 // Function:		AddCurve
 //
-// Description:		Adds an existing dataset to the plot.
+// Description:		Adds an new dataset to the plot.
 //
 // Input Arguments:
-//		data	= Dataset2D* to add
-//		name	= wxString specifying the label for the curve
+//		numerator	= wxString
+//		denominator	= wxString
 //
 // Output Arguments:
 //		None
@@ -694,15 +719,15 @@ void MainFrame::ClearAllCurves(void)
 //		None
 //
 //==========================================================================
-void MainFrame::AddCurve(wxString name)
+void MainFrame::AddCurve(wxString numerator, wxString denominator)
 {
-	if (!dataManager.AddTransferFunction(name))
+	if (!dataManager.AddTransferFunction(numerator, denominator))
 		return;
 
 	optionsGrid->BeginBatch();
 	if (optionsGrid->GetNumberRows() == 0)
 		AddTimeRowToGrid();
-	unsigned int index = AddDataRowToGrid(name);
+	unsigned int index = AddDataRowToGrid("(" + numerator + ")/(" + denominator + ")");
 	optionsGrid->EndBatch();
 
 	if (totalAmplitudePlot->GetCurveCount() == 0)
@@ -713,6 +738,33 @@ void MainFrame::AddCurve(wxString name)
 
 	UpdateSelectedTransferFunction(index - 1);
 	UpdateCurveProperties(index - 1, GetNextColor(index), true, false);
+}
+
+//==========================================================================
+// Class:			MainFrame
+// Function:		UpdateCurve
+//
+// Description:		Updates an existing dataset.
+//
+// Input Arguments:
+//		i			= unsigned int
+//		numerator	= wxString
+//		denominator	= wxString
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
+void MainFrame::UpdateCurve(unsigned int i, wxString numerator, wxString denominator)
+{
+	if (!dataManager.UpdateTransferFunction(i, numerator, denominator))
+		return;
+
+	optionsGrid->SetCellValue("(" + numerator + ")/(" + denominator + ")", i + 1, 0);
+	UpdatePlots();
 }
 
 void MainFrame::UpdateSelectedTransferFunction(const unsigned int &i)
@@ -886,7 +938,7 @@ void MainFrame::RemoveCurve(const unsigned int &i)
 	}
 	else
 		UpdateSelectedTransferFunction(0);
-	UpdatePlots();
+	//UpdatePlots();
 }
 
 //==========================================================================
@@ -939,7 +991,7 @@ void MainFrame::GridDoubleClickEvent(wxGridEvent &event)
 
 	if (event.GetCol() != colColor)
 	{
-		event.Skip();
+		UpdateCurve(row - 1);
 		return;
 	}
 
@@ -955,6 +1007,15 @@ void MainFrame::GridDoubleClickEvent(wxGridEvent &event)
 		optionsGrid->SetCellBackgroundColour(row, colColor, colorData.GetColour());
 		UpdateCurveProperties(row - 1);
 	}
+}
+
+void MainFrame::UpdateCurve(unsigned int i)
+{
+	TFDialog dialog(this, dataManager.GetNumerator(i), dataManager.GetDenominator(i));
+	if (dialog.ShowModal() != wxID_OK)
+		return;
+
+	UpdateCurve(i, dialog.GetNumerator(), dialog.GetDenominator());
 }
 
 //==========================================================================
@@ -1660,13 +1721,12 @@ void MainFrame::RadioButtonChangeEvent(wxCommandEvent& WXUNUSED(event))
 
 //==========================================================================
 // Class:			MainFrame
-// Function:		SplitterPositionChangedEvent
+// Function:		UpdatePlots
 //
-// Description:		Ensures that the opposite horizontal sash moves with the
-//					one actually being dragged by the user.
+// Description:		Updates all rendered plots.
 //
 // Input Arguments:
-//		event	= wxSplitterEvent&
+//		None
 //
 // Output Arguments:
 //		None
@@ -1675,13 +1735,6 @@ void MainFrame::RadioButtonChangeEvent(wxCommandEvent& WXUNUSED(event))
 //		None
 //
 //==========================================================================
-void MainFrame::SplitterPositionChangedEvent(wxSplitterEvent &event)
-{
-	// FIXME:  On resize, this screws up the effects of sash gravity that we like
-	selectedSplitter->SetSashPosition(event.GetSashPosition());
-	totalSplitter->SetSashPosition(event.GetSashPosition());
-}
-
 void MainFrame::UpdatePlots(void)
 {
 	selectedAmplitudePlot->UpdateDisplay();

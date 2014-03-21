@@ -32,6 +32,9 @@
 #include "utilities/math/vector.h"
 #include "utilities/math/plotMath.h"
 
+// This needs to be static to support working with multiple GL canvases
+wxGLContext *RenderWindow::context = NULL;
+
 //==========================================================================
 // Class:			RenderWindow
 // Function:		RenderWindow
@@ -56,8 +59,7 @@
 //==========================================================================
 RenderWindow::RenderWindow(wxWindow &parent, wxWindowID id, int args[],
     const wxPoint& position, const wxSize& size, long style) : wxGLCanvas(
-	&parent, id, position, size, style | wxFULL_REPAINT_ON_RESIZE, wxEmptyString,
-	args)
+	&parent, id, args, position, size, style | wxFULL_REPAINT_ON_RESIZE)
 {
 	wireFrame = false;
 	view3D = true;
@@ -106,6 +108,9 @@ RenderWindow::~RenderWindow()
 
 	delete viewToModel;
 	viewToModel = NULL;
+
+	delete GetContext();
+	context = NULL;
 }
 
 //==========================================================================
@@ -140,6 +145,30 @@ END_EVENT_TABLE()
 
 //==========================================================================
 // Class:			RenderWindow
+// Function:		GetContext
+//
+// Description:		Gets (or creates, if it doesn't yet exist) the GL context.
+//
+// Input Arguments:
+//		None
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		wxGLContext*
+//
+//==========================================================================
+wxGLContext* RenderWindow::GetContext(void)
+{
+	if (!context)
+		context = new wxGLContext(this);
+
+	return context;
+}
+
+//==========================================================================
+// Class:			RenderWindow
 // Function:		Render
 //
 // Description:		Updates the scene with all of this object's options and
@@ -160,11 +189,11 @@ void RenderWindow::Render()
 	if (!GetContext() || !IsShownOnScreen())
 		return;
 
-	SetCurrent();
+	SetCurrent(*context);
 	wxPaintDC(this);
 
-	if (modified)
-		Initialize();
+	// Need to initialize every time when working with multiple canvases
+	Initialize();
 
 	glClearColor((float)backgroundColor.GetRed(), (float)backgroundColor.GetGreen(),
 		(float)backgroundColor.GetBlue(), (float)backgroundColor.GetAlpha());
@@ -225,18 +254,15 @@ void RenderWindow::OnPaint(wxPaintEvent& WXUNUSED(event))
 //		None
 //
 //==========================================================================
-void RenderWindow::OnSize(wxSizeEvent& event)
+void RenderWindow::OnSize(wxSizeEvent& WXUNUSED(event))
 {
-    // This is also necessary to update the context on some platforms
-    wxGLCanvas::OnSize(event);
-
     // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
 	int w, h;
 	GetClientSize(&w, &h);
 
 	if (GetContext() && IsShownOnScreen())
 	{
-		SetCurrent();
+		SetCurrent(*context);
 		glViewport(0, 0, (GLint) w, (GLint) h);
 	}
 	Refresh();
@@ -440,7 +466,7 @@ void RenderWindow::OnMouseMoveEvent(wxMouseEvent &event)
 //==========================================================================
 void RenderWindow::PerformInteraction(InteractionType interaction, wxMouseEvent &event)
 {
-	SetCurrent();
+	SetCurrent(*context);
 	UpdateTransformationMatricies();
 	glMatrixMode(GL_MODELVIEW);
 
@@ -727,7 +753,7 @@ void RenderWindow::DoPan(wxMouseEvent &event)
 //==========================================================================
 void RenderWindow::SetCameraView(const Vector &position, const Vector &lookAt, const Vector &upDirection)
 {
-	SetCurrent();
+	SetCurrent(*context);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

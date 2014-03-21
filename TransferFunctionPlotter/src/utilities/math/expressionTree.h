@@ -35,6 +35,8 @@ public:
 	wxString Solve(wxString expression, const double &minFreq, const double &maxFreq,
 		const unsigned int &resolution, Dataset2D &magnitude, Dataset2D &phase);
 
+	wxString CheckExpression(wxString expression);
+
 private:
 	std::queue<wxString> outputQueue;
 	std::vector<Complex> dataVector;

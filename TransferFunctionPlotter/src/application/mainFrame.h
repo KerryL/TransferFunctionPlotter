@@ -83,9 +83,6 @@ private:
 	PlotRenderer *totalAmplitudePlot;
 	PlotRenderer *totalPhasePlot;
 
-	wxSplitterWindow *selectedSplitter;
-	wxSplitterWindow *totalSplitter;
-
 	enum Columns
 	{
 		colName = 0,
@@ -108,7 +105,9 @@ private:
 	void CreateGridContextMenu(const wxPoint &position, const unsigned int &row);
 
 	void ClearAllCurves(void);
-	void AddCurve(wxString name);
+	void AddCurve(wxString numerator, wxString denominator);
+	void UpdateCurve(unsigned int i);
+	void UpdateCurve(unsigned int i, wxString numerator, wxString denominator);
 	void RemoveCurve(const unsigned int &i);
 
 	Color GetNextColor(const unsigned int &index) const;
@@ -146,9 +145,7 @@ private:
 		idPlotContextAutoScaleLeft,
 
 		idPlotContextToggleRightGridlines,
-		idPlotContextAutoScaleRight,
-
-		idPlotSplitter
+		idPlotContextAutoScaleRight
 	};
 
 	wxMenu *CreateAxisContextMenu(const unsigned int &baseEventId) const;
@@ -157,6 +154,7 @@ private:
 	// Event handlers-----------------------------------------------------
 	// Buttons
 	void AddButtonClicked(wxCommandEvent &event);
+	void RemoveButtonClicked(wxCommandEvent &event);
 	void RemoveAllButtonClicked(wxCommandEvent &event);
 
 	// Other input controls
@@ -188,9 +186,6 @@ private:
 	void ContextToggleGridlinesRight(wxCommandEvent &event);
 	void ContextAutoScaleRight(wxCommandEvent &event);
 	void ContextSetRangeRight(wxCommandEvent &event);
-
-	// Other
-	void SplitterPositionChangedEvent(wxSplitterEvent &event);
 	// End event handlers-------------------------------------------------
 
 	void SetMarkerSize(const unsigned int &curve, const int &size);
