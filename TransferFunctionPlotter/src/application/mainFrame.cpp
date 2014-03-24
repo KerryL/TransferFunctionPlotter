@@ -33,12 +33,13 @@
 
 // *nix Icons
 #ifdef __WXGTK__
-#include "../../res/icons/tfplot16.xpm"
-#include "../../res/icons/tfplot24.xpm"
-#include "../../res/icons/tfplot32.xpm"
-#include "../../res/icons/tfplot48.xpm"
-#include "../../res/icons/tfplot64.xpm"
-#include "../../res/icons/tfplot128.xpm"
+#include "../../res/icons/tfPlotter16.xpm"
+#include "../../res/icons/tfPlotter24.xpm"
+#include "../../res/icons/tfPlotter32.xpm"
+#include "../../res/icons/tfPlotter48.xpm"
+#include "../../res/icons/tfPlotter64.xpm"
+#include "../../res/icons/tfPlotter128.xpm"
+#include "../../res/icons/tfPlotter256.xpm"
 #endif
 
 //==========================================================================
@@ -132,7 +133,7 @@ void MainFrame::CreateControls(void)
 	mainSplitter->SplitHorizontally(upperPanel, lowerPanel, 500);
 	mainSplitter->SetSize(GetClientSize());
 	mainSplitter->SetSashGravity(1.0);
-	mainSplitter->SetMinimumPaneSize(250);
+	mainSplitter->SetMinimumPaneSize(255);
 
 	SetSizerAndFit(topSizer);
 	mainSplitter->SetSashPosition(mainSplitter->GetSashPosition(), false);
@@ -288,7 +289,6 @@ wxGrid* MainFrame::CreateOptionsGrid(wxWindow *parent)
 	optionsGrid->CreateGrid(0, colCount, wxGrid::wxGridSelectRows);
 	optionsGrid->SetRowLabelSize(0);
 	optionsGrid->SetColFormatNumber(colLineSize);
-	optionsGrid->SetColFormatNumber(colMarkerSize);
 	optionsGrid->SetColFormatFloat(colLeftCursor);
 	optionsGrid->SetColFormatFloat(colRightCursor);
 	optionsGrid->SetColFormatFloat(colDifference);
@@ -298,7 +298,6 @@ wxGrid* MainFrame::CreateOptionsGrid(wxWindow *parent)
 	optionsGrid->SetColLabelValue(colName, _T("Curve"));
 	optionsGrid->SetColLabelValue(colColor, _T("Color"));
 	optionsGrid->SetColLabelValue(colLineSize, _T("Line"));
-	optionsGrid->SetColLabelValue(colMarkerSize, _T("Marker"));
 	optionsGrid->SetColLabelValue(colLeftCursor, _T("Left Cursor"));
 	optionsGrid->SetColLabelValue(colRightCursor, _T("Right Cursor"));
 	optionsGrid->SetColLabelValue(colDifference, _T("Difference"));
@@ -343,12 +342,13 @@ void MainFrame::SetProperties(void)
 #ifdef __WXMSW__
 	SetIcon(wxIcon(_T("ICON_ID_MAIN"), wxBITMAP_TYPE_ICO_RESOURCE));
 #elif __WXGTK__
-	SetIcon(wxIcon(tfplot16_xpm, wxBITMAP_TYPE_XPM));
-	SetIcon(wxIcon(tfplot24_xpm, wxBITMAP_TYPE_XPM));
-	SetIcon(wxIcon(tfplot32_xpm, wxBITMAP_TYPE_XPM));
-	SetIcon(wxIcon(tfplot48_xpm, wxBITMAP_TYPE_XPM));
-	SetIcon(wxIcon(tfplot64_xpm, wxBITMAP_TYPE_XPM));
-	SetIcon(wxIcontfplot128_xpm, wxBITMAP_TYPE_XPM));
+	SetIcon(wxIcon(tfPlotter16_xpm, wxBITMAP_TYPE_XPM));
+	SetIcon(wxIcon(tfPlotter24_xpm, wxBITMAP_TYPE_XPM));
+	SetIcon(wxIcon(tfPlotter32_xpm, wxBITMAP_TYPE_XPM));
+	SetIcon(wxIcon(tfPlotter48_xpm, wxBITMAP_TYPE_XPM));
+	SetIcon(wxIcon(tfPlotter64_xpm, wxBITMAP_TYPE_XPM));
+	SetIcon(wxIcon(tfPlotter128_xpm, wxBITMAP_TYPE_XPM));
+	SetIcon(wxIcon(tfPlotter256_xpm, wxBITMAP_TYPE_XPM));
 #endif
 }
 
@@ -516,7 +516,7 @@ void MainFrame::AddButtonClicked(wxCommandEvent& WXUNUSED(event))
 //		None
 //
 //==========================================================================
-void MainFrame::RemoveButtonClicked(wxCommandEvent &event)
+void MainFrame::RemoveButtonClicked(wxCommandEvent& WXUNUSED(event))
 {
 	wxArrayInt selection = optionsGrid->GetSelectedRows();
 	unsigned int i;
@@ -726,7 +726,7 @@ void MainFrame::AddCurve(wxString numerator, wxString denominator)
 
 	optionsGrid->BeginBatch();
 	if (optionsGrid->GetNumberRows() == 0)
-		AddTimeRowToGrid();
+		AddXRowToGrid();
 	unsigned int index = AddDataRowToGrid("(" + numerator + ")/(" + denominator + ")");
 	optionsGrid->EndBatch();
 
@@ -791,13 +791,15 @@ void MainFrame::UpdateSelectedTransferFunction(const unsigned int &i)
 //		None
 //
 //==========================================================================
-void MainFrame::AddTimeRowToGrid(void)
+void MainFrame::AddXRowToGrid(void)
 {
 	optionsGrid->AppendRows();
 
 	unsigned int i;
 	for (i = 0; i < colCount; i++)
 		optionsGrid->SetReadOnly(0, i, true);
+
+	optionsGrid->SetCellValue(0, 0, xLabel);
 }
 
 //==========================================================================
@@ -822,25 +824,21 @@ unsigned int MainFrame::AddDataRowToGrid(const wxString &name)
 	optionsGrid->AppendRows();
 
 	unsigned int maxLineSize(5);
-	unsigned int maxMarkerSize(5);
 
-	optionsGrid->SetCellEditor(index, colVisible, new wxGridCellBoolEditor);
-	optionsGrid->SetCellEditor(index, colRightAxis, new wxGridCellBoolEditor);
+	optionsGrid->SetCellRenderer(index, colVisible, new wxGridCellBoolRenderer);
+	optionsGrid->SetCellRenderer(index, colRightAxis, new wxGridCellBoolRenderer);
 	optionsGrid->SetCellEditor(index, colLineSize, new wxGridCellNumberEditor(1, maxLineSize));
-	optionsGrid->SetCellEditor(index, colMarkerSize, new wxGridCellNumberEditor(-1, maxMarkerSize));
 
 	unsigned int i;
-	for (i = 0; i < colDifference; i++)
+	for (i = 0; i < colCount; i++)
 			optionsGrid->SetReadOnly(index, i, true);
 	optionsGrid->SetReadOnly(index, colLineSize, false);
-	optionsGrid->SetReadOnly(index, colMarkerSize, false);
 	optionsGrid->SetCellValue(index, colName, name);
 
 	Color color = GetNextColor(index);
 
 	optionsGrid->SetCellBackgroundColour(index, colColor, color.ToWxColor());
 	optionsGrid->SetCellValue(index, colLineSize, _T("1"));
-	optionsGrid->SetCellValue(index, colMarkerSize, _T("-1"));
 	optionsGrid->SetCellValue(index, colVisible, _T("1"));
 
 	int width = optionsGrid->GetColumnWidth(colName);
@@ -937,8 +935,10 @@ void MainFrame::RemoveCurve(const unsigned int &i)
 		totalPhasePlot->RemoveAllCurves();
 	}
 	else
-		UpdateSelectedTransferFunction(0);
-	//UpdatePlots();
+	{
+		selectedAmplitudePlot->RemoveCurve(i);
+		selectedPhasePlot->RemoveCurve(i);
+	}
 }
 
 //==========================================================================
@@ -989,11 +989,11 @@ void MainFrame::GridDoubleClickEvent(wxGridEvent &event)
 	if (row == 0)
 		return;
 
-	if (event.GetCol() != colColor)
-	{
+	if (event.GetCol() == colName)
 		UpdateCurve(row - 1);
+	
+	if (event.GetCol() != colColor)
 		return;
-	}
 
 	wxColourData colorData;
 	colorData.SetColour(optionsGrid->GetCellBackgroundColour(row, colColor));
@@ -1106,11 +1106,9 @@ void MainFrame::UpdateCurveProperties(const unsigned int &index, const Color &co
 	const bool &visible, const bool &rightAxis)
 {
 	unsigned long lineSize;
-	long markerSize;
 	optionsGrid->GetCellValue(index + 1, colLineSize).ToULong(&lineSize);
-	optionsGrid->GetCellValue(index + 1, colMarkerSize).ToLong(&markerSize);
-	selectedAmplitudePlot->SetCurveProperties(index, color, visible, rightAxis, lineSize, markerSize);
-	selectedPhasePlot->SetCurveProperties(index, color, visible, rightAxis, lineSize, markerSize);
+	selectedAmplitudePlot->SetCurveProperties(index, color, visible, rightAxis, lineSize, -1);
+	selectedPhasePlot->SetCurveProperties(index, color, visible, rightAxis, lineSize, -1);
 
 	totalAmplitudePlot->SetCurveProperties(0, Color::ColorBlue, true, false, 1, 0);
 	totalPhasePlot->SetCurveProperties(0, Color::ColorBlue, true, false, 1, 0);
@@ -1118,7 +1116,7 @@ void MainFrame::UpdateCurveProperties(const unsigned int &index, const Color &co
 
 //==========================================================================
 // Class:			MainFrame
-// Function:		GridLeftClickEvent
+// Function:		GridCellChangeEvent
 //
 // Description:		Handles grid cell change events (for text controls).
 //
@@ -1135,7 +1133,7 @@ void MainFrame::UpdateCurveProperties(const unsigned int &index, const Color &co
 void MainFrame::GridCellChangeEvent(wxGridEvent &event)
 {
 	unsigned int row(event.GetRow());
-	if (row == 0 || (event.GetCol() != colLineSize && event.GetCol() != colMarkerSize))
+	if (row == 0 || event.GetCol() != colLineSize)
 	{
 		event.Skip();
 		return;
@@ -1611,29 +1609,6 @@ void MainFrame::ContextGridColor(wxCommandEvent& WXUNUSED(event))
 
 //==========================================================================
 // Class:			MainFrame
-// Function:		SetMarkerSize
-//
-// Description:		Sets the marker size for the specified curve.
-//
-// Input Arguments:
-//		curve	= const unsigned int&
-//		size	= const int&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::SetMarkerSize(const unsigned int &curve, const int &size)
-{
-	optionsGrid->SetCellValue(curve + 1, colMarkerSize, wxString::Format("%i", size));
-	UpdateCurveProperties(curve);
-}
-
-//==========================================================================
-// Class:			MainFrame
 // Function:		SetXLabels
 //
 // Description:		Sets the x-label for all four plots depending on selected
@@ -1652,19 +1627,14 @@ void MainFrame::SetMarkerSize(const unsigned int &curve, const int &size)
 void MainFrame::SetXLabels(void)
 {
 	if (frequencyUnitsHertzRadioButton->GetValue())
-	{
-		selectedAmplitudePlot->SetXLabel(_T("Frequency [Hz]"));
-		selectedPhasePlot->SetXLabel(_T("Frequency [Hz]"));
-		totalAmplitudePlot->SetXLabel(_T("Frequency [Hz]"));
-		totalPhasePlot->SetXLabel(_T("Frequency [Hz]"));
-	}
+		xLabel = _T("Frequency [Hz]");
 	else
-	{
-		selectedAmplitudePlot->SetXLabel(_T("Frequency [rad/sec]"));
-		selectedPhasePlot->SetXLabel(_T("Frequency [rad/sec]"));
-		totalAmplitudePlot->SetXLabel(_T("Frequency [rad/sec]"));
-		totalPhasePlot->SetXLabel(_T("Frequency [rad/sec]"));
-	}
+		xLabel = _T("Frequency [rad/sec]");
+
+	selectedAmplitudePlot->SetXLabel(xLabel);
+	selectedPhasePlot->SetXLabel(xLabel);
+	totalAmplitudePlot->SetXLabel(xLabel);
+	totalPhasePlot->SetXLabel(xLabel);
 }
 
 //==========================================================================
@@ -1675,7 +1645,7 @@ void MainFrame::SetXLabels(void)
 //					events.
 //
 // Input Arguments:
-//		event	= wxFocusEvent& (unused)
+//		event	= wxFocusEvent&
 //
 // Output Arguments:
 //		None
@@ -1684,13 +1654,14 @@ void MainFrame::SetXLabels(void)
 //		None
 //
 //==========================================================================
-void MainFrame::TextBoxChangeEvent(wxFocusEvent& WXUNUSED(event))
+void MainFrame::TextBoxChangeEvent(wxFocusEvent& event)
 {
 	double min, max;
 	if (minFrequencyTextBox->GetValue().ToDouble(&min) &&
 		maxFrequencyTextBox->GetValue().ToDouble(&max))
 		dataManager.SetFrequencyRange(min, max);
 	UpdatePlots();
+	event.Skip();
 }
 
 //==========================================================================

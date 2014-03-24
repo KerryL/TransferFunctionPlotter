@@ -88,7 +88,6 @@ private:
 		colName = 0,
 		colColor,
 		colLineSize,
-		colMarkerSize,
 		colLeftCursor,
 		colRightCursor,
 		colDifference,
@@ -111,7 +110,7 @@ private:
 	void RemoveCurve(const unsigned int &i);
 
 	Color GetNextColor(const unsigned int &index) const;
-	void AddTimeRowToGrid(void);
+	void AddXRowToGrid(void);
 	unsigned int AddDataRowToGrid(const wxString &name);
 
 	void UpdateCurveProperties(const unsigned int &index, const Color &color,
@@ -121,6 +120,7 @@ private:
 	void UpdateSelectedTransferFunction(const unsigned int &i);
 
 	void SetXLabels(void);
+	wxString xLabel;
 
 	DataManager dataManager;
 
@@ -187,8 +187,6 @@ private:
 	void ContextAutoScaleRight(wxCommandEvent &event);
 	void ContextSetRangeRight(wxCommandEvent &event);
 	// End event handlers-------------------------------------------------
-
-	void SetMarkerSize(const unsigned int &curve, const int &size);
 
 	bool XScalingFactorIsKnown(double &factor, wxString *label) const;
 	bool UnitStringToFactor(const wxString &unit, double &factor) const;

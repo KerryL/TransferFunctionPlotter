@@ -115,7 +115,6 @@ void DataManager::SetFrequencyRange(const double &min, const double &max)
 	maxFreq = max;
 
 	UpdateAllTransferFunctionData();
-	UpdateTotalTransferFunctionData();
 }
 
 wxString DataManager::ConstructTotalTransferFunction(void) const
