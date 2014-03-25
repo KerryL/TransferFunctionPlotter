@@ -20,10 +20,12 @@
 #include "utilities/math/plotMath.h"
 #include "utilities/math/expressionTree.h"
 
+const unsigned int DataManager::numberOfPoints(5000);
+
 DataManager::DataManager()
 {
 	frequencyHertz = true;
-	minFreq = 0.1;
+	minFreq = 0.01;
 	maxFreq = 100.0;
 }
 
@@ -34,7 +36,7 @@ bool DataManager::AddTransferFunction(const wxString &numerator, const wxString 
 
 	ExpressionTree expressionTree;
 	wxString errorString = expressionTree.Solve(AssembleTransferFunctionString(numerator, denominator),
-		minFreq, maxFreq, 1000, *magnitude, *phase);
+		minFreq, maxFreq, numberOfPoints, *magnitude, *phase);
 	if (!errorString.IsEmpty())
 	{
 		wxMessageBox(errorString);
@@ -59,7 +61,7 @@ bool DataManager::UpdateTransferFunction(const unsigned int &i, const wxString &
 
 	ExpressionTree expressionTree;
 	wxString errorString = expressionTree.Solve(AssembleTransferFunctionString(numerator, denominator),
-		minFreq, maxFreq, 1000, *magnitude, *phase);
+		minFreq, maxFreq, numberOfPoints, *magnitude, *phase);
 	if (!errorString.IsEmpty())
 	{
 		wxMessageBox(errorString);
@@ -148,7 +150,7 @@ void DataManager::UpdateTotalTransferFunctionData(void)
 	else
 	{
 		expressionTree.Solve(totalTF, minFreq * 2.0 * PlotMath::pi,
-			maxFreq * 2.0 * PlotMath::pi, 1000, totalAmplitude, totalPhase);
+			maxFreq * 2.0 * PlotMath::pi, numberOfPoints, totalAmplitude, totalPhase);
 
 		totalAmplitude.MultiplyXData(0.5 / PlotMath::pi);
 		totalPhase.MultiplyXData(0.5 / PlotMath::pi);
@@ -185,7 +187,7 @@ void DataManager::UpdateAllTransferFunctionData(void)
 		else
 		{
 			expressionTree.Solve(AssembleTransferFunctionString(transferFunctions[i]), minFreq * 2.0 * PlotMath::pi,
-			maxFreq * 2.0 * PlotMath::pi, 1000, *amplitudePlots[i], *phasePlots[i]);
+			maxFreq * 2.0 * PlotMath::pi, numberOfPoints, *amplitudePlots[i], *phasePlots[i]);
 
 			amplitudePlots[i]->MultiplyXData(0.5 / PlotMath::pi);
 			phasePlots[i]->MultiplyXData(0.5 / PlotMath::pi);

@@ -55,6 +55,8 @@ private:
 	double minFreq, maxFreq;// [Hz]
 	bool frequencyHertz;
 
+	static const unsigned int numberOfPoints;
+
 	ManagedList<Dataset2D> amplitudePlots;
 	ManagedList<Dataset2D> phasePlots;
 

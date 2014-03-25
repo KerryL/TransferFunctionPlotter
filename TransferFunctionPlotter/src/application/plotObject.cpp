@@ -953,6 +953,14 @@ void PlotObject::HandleZeroRangeAxis(double &min, double &max) const
 	{
 		min -= min * 0.1;
 		max += max * 0.1;
+		
+		// In case both min and max are negative
+		if (max < min)
+		{
+			double temp(min);
+			min = max;
+			max = temp;
+		}
 	}
 }
 

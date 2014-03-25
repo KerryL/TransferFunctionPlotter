@@ -143,6 +143,7 @@ private:
 	void InitializeTickParameters(int &inside, int &outside, int &sign) const;
 	void GetNextLogValue(const bool &first, double &value) const;
 	double GetNextTickValue(const bool &first, const bool &last, const unsigned int &tick) const;
+	double GetNextGridValue(const unsigned int &tick) const;
 
 	void DrawAxisLabel(void) const;
 	void DrawTickLabels(void);

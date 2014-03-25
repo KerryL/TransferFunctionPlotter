@@ -328,7 +328,11 @@ void Axis::DrawHorizontalGrid(const unsigned int &count) const
 	int location;
 	for (grid = 1; grid <= count; grid++)
 	{
-		location = ValueToPixel(GetNextTickValue(false, false, grid));
+		location = ValueToPixel(GetNextGridValue(grid));
+		if (location < minAxis->GetOffsetFromWindowEdge() ||
+			location > renderWindow.GetSize().GetWidth() - maxAxis->GetOffsetFromWindowEdge())
+			continue;
+
 		glVertex2i(location, offsetFromWindowEdge);
 		glVertex2i(location, renderWindow.GetSize().GetHeight() - oppositeAxis->GetOffsetFromWindowEdge());
 	}
@@ -394,7 +398,11 @@ void Axis::DrawVerticalGrid(const unsigned int &count) const
 	int location;
 	for (grid = 1; grid <= count; grid++)
 	{
-		location = ValueToPixel(GetNextTickValue(false, false, grid));
+		location = ValueToPixel(GetNextGridValue(grid));
+		if (location < minAxis->GetOffsetFromWindowEdge() ||
+			location > renderWindow.GetSize().GetHeight() - maxAxis->GetOffsetFromWindowEdge())
+			continue;
+
 		glVertex2i(offsetFromWindowEdge, location);
 		glVertex2i(renderWindow.GetSize().GetWidth() - oppositeAxis->GetOffsetFromWindowEdge(), location);
 	}
@@ -594,10 +602,20 @@ void Axis::DrawTickLabels(void)
 	double valueOffsetFromEdge = offsetFromWindowEdge * 0.8;
 	unsigned int tick, numberOfTicks;
 	ComputeGridAndTickCounts(numberOfTicks);
+
 	for (tick = 0; tick < numberOfTicks + 2; tick++)
 	{
 		value = std::min(GetNextTickValue(tick == 0, tick == numberOfTicks + 1, tick), maximum);
-		valueLabel.Printf("%0.*f", precision, value);
+
+		if (logarithmic)
+		{
+			if (!PlotMath::IsZero(floor(log10(value)) - log10(value)))
+				continue;
+
+			valueLabel.Printf("10^%i", (int)floor(log10(value)));
+		}
+		else
+			valueLabel.Printf("%0.*f", precision, value);
 
 		glPushMatrix();
 			glLoadIdentity();
@@ -607,7 +625,16 @@ void Axis::DrawTickLabels(void)
 		glPopMatrix();
 	}
 
-	if (!valueLabel.ToDouble(&maximum)) { /*Warn the user?*/ }
+	if (logarithmic)
+	{
+		double power;
+		if (!valueLabel.Mid(3).ToDouble(&power)) { /*Warn the user?*/ }
+		//maximum = pow(10.0, power);
+	}
+	else
+	{
+		if (!valueLabel.ToDouble(&maximum)) { /*Warn the user?*/ }
+	}
 }
 
 //==========================================================================
@@ -674,6 +701,31 @@ double Axis::GetNextTickValue(const bool &first, const bool &last, const unsigne
 		else
 			return pow(10.0, floor(log10(minimum)) + tick);
 	}
+
+	return minimum + (double)tick * majorResolution;
+}
+
+//==========================================================================
+// Class:			Axis
+// Function:		GetNextGridValue
+//
+// Description:		Computes value to display at the next grid line.
+//
+// Input Arguments:
+//		tick	= const unsigned int&
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		double
+//
+//==========================================================================
+double Axis::GetNextGridValue(const unsigned int &tick) const
+{
+	if (logarithmic)
+		return pow(10.0, floor(log10(minimum)) + floor(tick / 9.0))
+			* (tick - 9.0 * floor(tick / 9.0) + 1.0);
 
 	return minimum + (double)tick * majorResolution;
 }

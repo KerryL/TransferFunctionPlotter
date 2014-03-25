@@ -245,10 +245,12 @@ wxSizer* MainFrame::CreateInputControls(wxWindow *parent)
 	sizer->Add(frequencyUnitsRadRadioButton, 0, wxALL, 2);
 	sizer->AddSpacer(10);
 
+	double minFreq(0.01), maxFreq(100.0);
 	wxStaticText *minFreqLabel = new wxStaticText(parent, wxID_ANY, _T("Min. Frequency"));
-	minFrequencyTextBox = new wxTextCtrl(parent, wxID_ANY, _T("0.1"));
+	minFrequencyTextBox = new wxTextCtrl(parent, wxID_ANY, wxString::Format("%0.2f", minFreq));
 	wxStaticText *maxFreqLabel = new wxStaticText(parent, wxID_ANY, _T("Max. Frequency"));
-	maxFrequencyTextBox = new wxTextCtrl(parent, wxID_ANY, _T("100.0"));
+	maxFrequencyTextBox = new wxTextCtrl(parent, wxID_ANY, wxString::Format("%0.1f", maxFreq));
+	dataManager.SetFrequencyRange(minFreq, maxFreq);
 
 	minFrequencyTextBox->Connect(wxEVT_KILL_FOCUS, wxFocusEventHandler(MainFrame::TextBoxChangeEvent), NULL, this);
 	maxFrequencyTextBox->Connect(wxEVT_KILL_FOCUS, wxFocusEventHandler(MainFrame::TextBoxChangeEvent), NULL, this);
@@ -1661,7 +1663,7 @@ void MainFrame::TextBoxChangeEvent(wxFocusEvent& event)
 		maxFrequencyTextBox->GetValue().ToDouble(&max))
 		dataManager.SetFrequencyRange(min, max);
 	UpdatePlots();
-	event.Skip();
+	event.Skip();// Without skipping the event, the cursot gets stuck in the box and we never loose focus
 }
 
 //==========================================================================
