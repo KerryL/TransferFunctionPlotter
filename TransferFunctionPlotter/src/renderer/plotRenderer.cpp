@@ -564,6 +564,27 @@ bool PlotRenderer::GetBottomGrid(void) const
 
 //==========================================================================
 // Class:			PlotRenderer
+// Function:		GetBottomMinorGrid
+//
+// Description:		Returns the status of the bottom minor grid.
+//
+// Input Arguments:
+//		None
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		bool indicating status of bottom grid
+//
+//==========================================================================
+bool PlotRenderer::GetBottomMinorGrid(void) const
+{
+	return plot->GetBottomAxis()->GetMinorGrid();
+}
+
+//==========================================================================
+// Class:			PlotRenderer
 // Function:		GetLeftGrid
 //
 // Description:		Returns the status of the left grid.
@@ -623,7 +644,28 @@ bool PlotRenderer::GetRightGrid(void) const
 void PlotRenderer::SetBottomGrid(const bool &grid)
 {
 	plot->SetXGrid(grid);
+	UpdateDisplay();
+}
 
+//==========================================================================
+// Class:			PlotRenderer
+// Function:		SetBottomMinorGrid
+//
+// Description:		Sets the status of the bottom axis' minor grid.
+//
+// Input Arguments:
+//		None
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
+void PlotRenderer::SetBottomMinorGrid(const bool &grid)
+{
+	plot->SetXMinorGrid(grid);
 	UpdateDisplay();
 }
 

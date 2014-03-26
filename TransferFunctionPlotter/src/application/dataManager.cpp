@@ -146,7 +146,7 @@ void DataManager::UpdateTotalTransferFunctionData(void)
 
 	ExpressionTree expressionTree;
 	if (frequencyHertz)
-		expressionTree.Solve(totalTF, minFreq, maxFreq, 1000, totalAmplitude, totalPhase);
+		expressionTree.Solve(totalTF, minFreq, maxFreq, numberOfPoints, totalAmplitude, totalPhase);
 	else
 	{
 		expressionTree.Solve(totalTF, minFreq * 2.0 * PlotMath::pi,
@@ -182,7 +182,7 @@ void DataManager::UpdateAllTransferFunctionData(void)
 	for (i = 0; i < amplitudePlots.GetCount(); i++)
 	{
 		if (frequencyHertz)
-			expressionTree.Solve(AssembleTransferFunctionString(transferFunctions[i]), minFreq, maxFreq, 1000,
+			expressionTree.Solve(AssembleTransferFunctionString(transferFunctions[i]), minFreq, maxFreq, numberOfPoints,
 			*amplitudePlots[i], *phasePlots[i]);
 		else
 		{

@@ -78,6 +78,7 @@ public:
 		const int &markerSize);
 	void SetGrid(const bool &gridOn);
 	void SetXGrid(const bool &gridOn);
+	void SetXMinorGrid(const bool &gridOn);
 	void SetLeftYGrid(const bool &gridOn);
 	void SetRightYGrid(const bool &gridOn);
 

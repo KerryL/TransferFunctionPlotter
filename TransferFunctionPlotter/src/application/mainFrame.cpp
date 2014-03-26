@@ -394,6 +394,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 
 	EVT_MENU(idPlotContextToggleBottomGridlines,	MainFrame::ContextToggleGridlinesBottom)
 	EVT_MENU(idPlotContextAutoScaleBottom,			MainFrame::ContextAutoScaleBottom)
+	EVT_MENU(idPlotContextToggleBottomMinorGridlines,	MainFrame::ContextToggleMinorGridlinesBottom)
 
 	EVT_MENU(idPlotContextToggleLeftGridlines,		MainFrame::ContextToggleGridlinesLeft)
 	EVT_MENU(idPlotContextAutoScaleLeft,			MainFrame::ContextAutoScaleLeft)
@@ -602,6 +603,7 @@ void MainFrame::CreatePlotContextMenu(const wxPoint &position, const PlotContext
 	{
 	case plotContextXAxis:
 		contextMenu = CreateAxisContextMenu(idPlotContextToggleBottomGridlines);
+		contextMenu->Insert(1, idPlotContextToggleBottomMinorGridlines, _T("Toggle Minor Gridlines"));
 		break;
 
 	case plotContextLeftYAxis:
@@ -1409,6 +1411,30 @@ void MainFrame::ContextToggleGridlinesBottom(wxCommandEvent& WXUNUSED(event))
 	selectedPhasePlot->SetBottomGrid(!selectedPhasePlot->GetBottomGrid());
 	totalAmplitudePlot->SetBottomGrid(!totalAmplitudePlot->GetBottomGrid());
 	totalPhasePlot->SetBottomGrid(!totalPhasePlot->GetBottomGrid());
+}
+
+//==========================================================================
+// Class:			MainFrame
+// Function:		ContextToggleMinorGridlinesBottom
+//
+// Description:		Toggles gridlines for the bottom axis.
+//
+// Input Arguments:
+//		event	= wxCommandEvent&
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
+void MainFrame::ContextToggleMinorGridlinesBottom(wxCommandEvent& WXUNUSED(event))
+{
+	selectedAmplitudePlot->SetBottomMinorGrid(!selectedAmplitudePlot->GetBottomMinorGrid());
+	selectedPhasePlot->SetBottomMinorGrid(!selectedPhasePlot->GetBottomMinorGrid());
+	totalAmplitudePlot->SetBottomMinorGrid(!totalAmplitudePlot->GetBottomMinorGrid());
+	totalPhasePlot->SetBottomMinorGrid(!totalPhasePlot->GetBottomMinorGrid());
 }
 
 //==========================================================================

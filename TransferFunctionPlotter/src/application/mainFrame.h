@@ -140,6 +140,7 @@ private:
 
 		idPlotContextToggleBottomGridlines,// Maintain this order for each axis' context IDs
 		idPlotContextAutoScaleBottom,
+		idPlotContextToggleBottomMinorGridlines,
 
 		idPlotContextToggleLeftGridlines,
 		idPlotContextAutoScaleLeft,
@@ -178,6 +179,7 @@ private:
 	void ContextToggleGridlinesBottom(wxCommandEvent &event);
 	void ContextAutoScaleBottom(wxCommandEvent &event);
 	void ContextSetRangeBottom(wxCommandEvent &event);
+	void ContextToggleMinorGridlinesBottom(wxCommandEvent &event);
 
 	void ContextToggleGridlinesLeft(wxCommandEvent &event);
 	void ContextAutoScaleLeft(wxCommandEvent &event);

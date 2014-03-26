@@ -44,6 +44,7 @@ public:
 
 	// Gets properties for actors
 	bool GetBottomGrid(void) const;
+	bool GetBottomMinorGrid(void) const;
 	bool GetLeftGrid(void) const;
 	bool GetRightGrid(void) const;
 
@@ -66,6 +67,7 @@ public:
 	void SetGridOn(void);
 	void SetGridOff(void);
 	void SetBottomGrid(const bool &grid);
+	void SetBottomMinorGrid(const bool &grid);
 	void SetLeftGrid(const bool &grid);
 	void SetRightGrid(const bool &grid);
 

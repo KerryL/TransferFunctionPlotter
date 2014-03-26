@@ -56,6 +56,8 @@ void TFDialog::CreateControls(const wxString &numerator, const wxString &denomin
 	mainSizer->Add(CreateButtonSizer(wxOK | wxCANCEL), 0, wxGROW);
 
 	SetSizerAndFit(topSizer);
+	SetMaxSize(wxSize(-1, GetSize().GetY()));
+	SetMinSize(wxSize(400, GetSize().GetY()));
 
 	numeratorCtrl->SetFocus();
 	Center();

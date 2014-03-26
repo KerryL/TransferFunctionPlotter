@@ -56,6 +56,7 @@ Axis::Axis(RenderWindow &_renderWindow) : Primitive(_renderWindow)
 	offsetFromWindowEdge = 75;// [pixels]
 
 	grid = false;
+	minorGrid = true;
 
 	logarithmic = false;
 
@@ -328,9 +329,13 @@ void Axis::DrawHorizontalGrid(const unsigned int &count) const
 	int location;
 	for (grid = 1; grid <= count; grid++)
 	{
-		location = ValueToPixel(GetNextGridValue(grid));
-		if (location < minAxis->GetOffsetFromWindowEdge() ||
-			location > renderWindow.GetSize().GetWidth() - maxAxis->GetOffsetFromWindowEdge())
+		if (minorGrid)
+			location = ValueToPixel(GetNextGridValue(grid));
+		else
+			location = ValueToPixel(GetNextTickValue(false, false, grid));
+
+		if (location < (int)minAxis->GetOffsetFromWindowEdge() ||
+			location > (int)renderWindow.GetSize().GetWidth() - (int)maxAxis->GetOffsetFromWindowEdge())
 			continue;
 
 		glVertex2i(location, offsetFromWindowEdge);
@@ -398,9 +403,13 @@ void Axis::DrawVerticalGrid(const unsigned int &count) const
 	int location;
 	for (grid = 1; grid <= count; grid++)
 	{
-		location = ValueToPixel(GetNextGridValue(grid));
-		if (location < minAxis->GetOffsetFromWindowEdge() ||
-			location > renderWindow.GetSize().GetHeight() - maxAxis->GetOffsetFromWindowEdge())
+		if (minorGrid)
+			location = ValueToPixel(GetNextGridValue(grid));
+		else
+			location = ValueToPixel(GetNextTickValue(false, false, grid));
+
+		if (location < (int)minAxis->GetOffsetFromWindowEdge() ||
+			location > (int)renderWindow.GetSize().GetHeight() - (int)maxAxis->GetOffsetFromWindowEdge())
 			continue;
 
 		glVertex2i(offsetFromWindowEdge, location);
@@ -595,7 +604,7 @@ void Axis::DrawTickLabels(void)
 	int xTranslation, yTranslation;
 	unsigned int precision = GetPrecision();
 
-	if (!wxString::Format("%0.*f", precision, minimum).ToDouble(&minimum)) { /*Warn the user?*/ }
+	if (!AssignFormattedValue(precision, minimum)) { /*Warn the user?*/ }
 
 	double value;
 	wxString valueLabel;
@@ -609,32 +618,56 @@ void Axis::DrawTickLabels(void)
 
 		if (logarithmic)
 		{
-			if (!PlotMath::IsZero(floor(log10(value)) - log10(value)))
-				continue;
-
-			valueLabel.Printf("10^%i", (int)floor(log10(value)));
+			if (PlotMath::IsZero(floor(log10(value)) - log10(value)))
+				valueLabel.Printf("10^%i", (int)floor(log10(value)));
+			else
+				valueLabel.Printf("10^%0.*f", precision, log10(value));
 		}
 		else
 			valueLabel.Printf("%0.*f", precision, value);
 
 		glPushMatrix();
 			glLoadIdentity();
-			ComputeTranslations(value, xTranslation, yTranslation, font->BBox(valueLabel.mb_str()), valueOffsetFromEdge);
+			ComputeTranslations(value, xTranslation, yTranslation,
+				font->BBox(valueLabel.mb_str()), valueOffsetFromEdge);
 			glTranslated(xTranslation, yTranslation, 0.0);
 			font->Render(valueLabel.mb_str());
 		glPopMatrix();
 	}
 
+	maximum = value;
+	if (!AssignFormattedValue(precision, maximum)) { /*Warn the user?*/ }
+}
+
+//==========================================================================
+// Class:			Axis
+// Function:		AssignFormattedValue
+//
+// Description:		Rounds the specified value to the appropriate precision.
+//
+// Input Arguments:
+//		precision	= const unsigned int&
+//		value		= double&
+//
+// Output Arguments:
+//		value		= double&
+//
+// Return Value:
+//		bool, true for success, false otherwise
+//
+//==========================================================================
+bool Axis::AssignFormattedValue(const unsigned int &precision, double &value) const
+{
 	if (logarithmic)
 	{
 		double power;
-		if (!valueLabel.Mid(3).ToDouble(&power)) { /*Warn the user?*/ }
-		//maximum = pow(10.0, power);
+		if (!wxString::Format("%0.*f", precision, log10(value)).ToDouble(&power)) { return false; }
+		value = pow(10.0, power);
+
+		return true;
 	}
-	else
-	{
-		if (!valueLabel.ToDouble(&maximum)) { /*Warn the user?*/ }
-	}
+	
+	return wxString::Format("%0.*f", precision, value).ToDouble(&value);
 }
 
 //==========================================================================
@@ -658,7 +691,7 @@ unsigned int Axis::GetPrecision(void) const
 	unsigned int precision;
 	double baseValue;
 	if (logarithmic)
-		baseValue = minimum;
+		baseValue = maximum - minimum;
 	else
 		baseValue = majorResolution;
 

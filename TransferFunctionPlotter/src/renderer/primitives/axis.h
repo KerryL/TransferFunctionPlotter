@@ -66,6 +66,7 @@ public:
 	void SetMajorResolution(const double &_majorResolution) { majorResolution = _majorResolution; modified = true; };
 	void SetMinorResolution(const double &_minorResolution) { minorResolution = _minorResolution; modified = true; };
 	void SetGrid(const bool &_grid) { grid = _grid; modified = true; };
+	void SetMinorGrid(const bool &minorGrid) { this->minorGrid = minorGrid; modified = true; };
 	void SetLabel(wxString _label) { label = _label; modified = true; };
 	void SetFont(FTFont *_font) { font = _font; modified = true; };
 	void SetGridColor(const Color &_gridColor) { gridColor = _gridColor; modified = true; };
@@ -85,6 +86,7 @@ public:
 	bool IsHorizontal(void) const;
 	inline unsigned int GetOffsetFromWindowEdge(void) const { return offsetFromWindowEdge; };
 	inline bool GetGrid(void) const { return grid; };
+	inline bool GetMinorGrid(void) const { return minorGrid; };
 	inline Color GetGridColor(void) const { return gridColor; };
 
 	inline const Axis* GetAxisAtMinEnd(void) const { return minAxis; };
@@ -114,7 +116,7 @@ private:
 
 	// The tick options
 	TickStyle tickStyle;
-	bool grid;
+	bool grid, minorGrid;
 	int tickSize;
 
 	// Color of the grid
@@ -147,6 +149,9 @@ private:
 
 	void DrawAxisLabel(void) const;
 	void DrawTickLabels(void);
+
+	bool AssignFormattedValue(const unsigned int &precision, double &value) const;
+	//wxString AssignValueToString(const unsigned int &precision, double &value) const;
 
 	double GetAxisLabelTranslation(const double &offset, const double &fontHeight) const;
 	unsigned int GetPrecision(void) const;

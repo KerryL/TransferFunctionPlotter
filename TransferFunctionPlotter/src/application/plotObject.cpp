@@ -256,6 +256,27 @@ void PlotObject::SetXGrid(const bool &gridOn)
 
 //==========================================================================
 // Class:			PlotObject
+// Function:		SetXMinorGrid
+//
+// Description:		Sets the status of the x-axis minor grid.
+//
+// Input Arguments:
+//		None
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
+void PlotObject::SetXMinorGrid(const bool &gridOn)
+{
+	axisBottom->SetMinorGrid(gridOn);
+}
+
+//==========================================================================
+// Class:			PlotObject
 // Function:		SetLeftYGrid
 //
 // Description:		Sets the status of the left y-axis grid.
