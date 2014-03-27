@@ -80,7 +80,7 @@ private:
 		std::stack<std::vector<Complex> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
 	bool EvaluateNumber(const wxString &number, std::stack<double> &doubleStack,
 		std::stack<bool> &useDoubleStack, wxString &errorString) const;
-	bool ExpressionTree::EvaluateS(std::stack<std::vector<Complex> > &vectorStack,
+	bool EvaluateS(std::stack<std::vector<Complex> > &vectorStack,
 		std::stack<bool> &useDoubleStack) const;
 
 	bool ParenthesesBalanced(const wxString &expression) const;

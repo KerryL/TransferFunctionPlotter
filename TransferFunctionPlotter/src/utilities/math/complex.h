@@ -13,10 +13,8 @@
 // Description:  Contains class declaration for complex number class.
 // History:
 
-#ifndef _Complex_H_
-#define _Complex_H_
-
-using namespace std;
+#ifndef COMPLEX_H_
+#define COMPLEX_H_
 
 // wxWidgets forward declarations
 class wxString;
@@ -63,7 +61,7 @@ public:
 	const Complex ToPower(const Complex &power) const;
 
 	// For streaming the value
-	friend ostream &operator << (ostream &writeOut, const Complex &complex);
+	friend std::ostream &operator << (std::ostream &writeOut, const Complex &complex);
 
 	// The actual data contents of this class
 	double real;

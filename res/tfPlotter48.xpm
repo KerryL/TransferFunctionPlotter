@@ -1,5 +1,5 @@
 /* XPM */
-static char * tfPlotter48_xpm[] = {
+static const char * tfPlotter48_xpm[] = {
 "256 256 394 2",
 "  	c None",
 ". 	c #000000",

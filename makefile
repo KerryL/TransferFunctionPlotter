@@ -8,11 +8,11 @@ TARGET = TransferFunctionPlotter
 
 # Directories in which to search for source files
 DIRS = \
-	src/application \
-	src/renderer \
-	src/renderer/primitives \
-	src/utilities \
-	src/utilities/math
+	TransferFunctionPlotter/src/application \
+	TransferFunctionPlotter/src/renderer \
+	TransferFunctionPlotter/src/renderer/primitives \
+	TransferFunctionPlotter/src/utilities \
+	TransferFunctionPlotter/src/utilities/math
 
 # Source files
 SRC = $(foreach dir, $(DIRS), $(wildcard $(dir)/*.cpp))

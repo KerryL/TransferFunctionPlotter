@@ -33,13 +33,13 @@
 
 // *nix Icons
 #ifdef __WXGTK__
-#include "../../res/icons/tfPlotter16.xpm"
-#include "../../res/icons/tfPlotter24.xpm"
-#include "../../res/icons/tfPlotter32.xpm"
-#include "../../res/icons/tfPlotter48.xpm"
-#include "../../res/icons/tfPlotter64.xpm"
-#include "../../res/icons/tfPlotter128.xpm"
-#include "../../res/icons/tfPlotter256.xpm"
+#include "res/tfPlotter16.xpm"
+#include "res/tfPlotter24.xpm"
+#include "res/tfPlotter32.xpm"
+#include "res/tfPlotter48.xpm"
+#include "res/tfPlotter64.xpm"
+#include "res/tfPlotter128.xpm"
+#include "res/tfPlotter256.xpm"
 #endif
 
 //==========================================================================
@@ -496,7 +496,7 @@ wxArrayString MainFrame::GetFileNameFromUser(wxString dialogTitle, wxString defa
 //==========================================================================
 void MainFrame::AddButtonClicked(wxCommandEvent& WXUNUSED(event))
 {
-	TFDialog dialog = new TFDialog(this);
+	TFDialog dialog(this);
 	if (dialog.ShowModal() != wxID_OK)
 		return;
 

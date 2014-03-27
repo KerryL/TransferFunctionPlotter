@@ -7,7 +7,8 @@
 # DO NOT include the -I prefix to these paths - it will
 # be added automatically
 INCDIRS_TEMP = \
-	$(CURDIR)/src 
+	$(CURDIR) \
+	$(CURDIR)/TransferFunctionPlotter/src
 
 INCDIRS = $(addprefix -I,$(INCDIRS_TEMP))
 

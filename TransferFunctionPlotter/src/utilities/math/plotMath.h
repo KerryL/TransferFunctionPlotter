@@ -34,7 +34,6 @@ namespace PlotMath
 
 	// Constant declarations
 	const double NEARLY_ZERO = 1.0e-12;
-	const double QNAN = std::numeric_limits<double>::quiet_NaN();
 	const double pi = 3.141592653589793238462643;
 
 	// Prototypes =====================================================
