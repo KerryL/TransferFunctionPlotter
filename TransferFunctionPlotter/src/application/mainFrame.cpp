@@ -1299,6 +1299,57 @@ void MainFrame::UpdateSingleCursorValue(const unsigned int &row,
 
 //==========================================================================
 // Class:			MainFrame
+// Function:		DisplayAxisRangeDialog
+//
+// Description:		Displays an input dialog that allows the user to set the
+//					range for an axis.
+//
+// Input Arguments:
+//		axis	= const PlotContext& specifying the axis which is to be resized
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
+void MainFrame::DisplayAxisRangeDialog(const PlotContext &axis)
+{
+	/*double min, max;
+	if (!GetCurrentAxisRange(axis, min, max))
+		return;
+
+	RangeLimitsDialog dialog(this, min, max);
+	if (dialog.ShowModal() != wxID_OK)
+		return;
+
+	// Get the new limits (and correct if they entered the larger value in the min box)
+	if (dialog.GetMinimum() < dialog.GetMaximum())
+	{
+		min = dialog.GetMinimum();
+		max = dialog.GetMaximum();
+	}
+	else
+	{
+		max = dialog.GetMinimum();
+		min = dialog.GetMaximum();
+	}
+
+	// Make sure the limits aren't equal
+	if (min == max)
+	{
+		wxMessageBox(_T("ERROR:  Limits must unique!"), _T("Error Setting Limits"), wxICON_ERROR, this);
+		return;
+	}
+
+	SetNewAxisRange(axis, min, max);
+	plotArea->SaveCurrentZoom();*/
+	// TODO:  Needs some work to affect all/one plot?
+}
+
+//==========================================================================
+// Class:			MainFrame
 // Function:		GetCurrentAxisRange
 //
 // Description:		Returns the range for the specified axis.

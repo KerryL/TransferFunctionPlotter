@@ -36,7 +36,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
@@ -48,7 +50,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(WXWIN)\lib\vc_dll;$(FTGL)\msvc\Build;$(FREETYPE)\objs\win32\vc2010;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>wxbase30ud.lib;wxmsw30ud_adv.lib;wxbase30ud_xml.lib;wxmsw30ud_core.lib;wxmsw30ud_gl.lib;wxzlibd.lib;opengl32.lib;ftgl_static_D.lib;freetype2410MT_D.lib;comctl32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wxbase30ud.lib;wxmsw30ud_adv.lib;wxbase30ud_xml.lib;wxmsw30ud_core.lib;wxmsw30ud_gl.lib;wxzlibd.lib;opengl32.lib;ftgl_static_D.lib;freetype2410MT_D.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ResourceCompile>

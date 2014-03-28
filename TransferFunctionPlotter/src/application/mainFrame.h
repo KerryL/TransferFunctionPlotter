@@ -56,6 +56,7 @@ public:
 	};
 
 	void CreatePlotContextMenu(const wxPoint &position, const PlotContext &context);
+	void DisplayAxisRangeDialog(const PlotContext &axis);
 
 	void UpdateCursorValues(const bool &leftVisible, const bool &rightVisible,
 		const double &leftValue, const double &rightValue);

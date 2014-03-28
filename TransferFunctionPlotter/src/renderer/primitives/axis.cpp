@@ -606,7 +606,7 @@ void Axis::DrawTickLabels(void)
 
 	if (!AssignFormattedValue(precision, minimum)) { /*Warn the user?*/ }
 
-	double value;
+	double value(maximum);
 	wxString valueLabel;
 	double valueOffsetFromEdge = offsetFromWindowEdge * 0.8;
 	unsigned int tick, numberOfTicks;

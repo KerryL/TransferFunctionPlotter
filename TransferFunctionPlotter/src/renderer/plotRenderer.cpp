@@ -1938,7 +1938,7 @@ void PlotRenderer::ProcessPlotAreaDoubleClick(const unsigned int &x)
 //==========================================================================
 void PlotRenderer::ProcessOffPlotDoubleClick(const unsigned int &x, const unsigned int &y)
 {
-/*	// Determine the context
+	// Determine the context
 	MainFrame::PlotContext context;
 	if (x < plot->GetLeftYAxis()->GetOffsetFromWindowEdge() &&
 		y > plot->GetTopAxis()->GetOffsetFromWindowEdge() &&
@@ -1956,8 +1956,7 @@ void PlotRenderer::ProcessOffPlotDoubleClick(const unsigned int &x, const unsign
 		context = MainFrame::plotContextPlotArea;
 
 	// Display the dialog
-	mainFrame.DisplayAxisRangeDialog(context);*/
-	// FIXME:  Remove?
+	mainFrame.DisplayAxisRangeDialog(context);
 }
 
 //==========================================================================
