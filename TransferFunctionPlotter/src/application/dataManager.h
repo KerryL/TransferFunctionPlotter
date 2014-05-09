@@ -40,8 +40,8 @@ public:
 
 	Dataset2D* GetAmplitudeData(const unsigned int &i) { return amplitudePlots[i]; };
 	Dataset2D* GetPhaseData(const unsigned int &i) { return phasePlots[i]; };
-	Dataset2D* GetTotalAmplitudeData(void) { return &totalAmplitude; };
-	Dataset2D* GetTotalPhaseData(void) { return &totalPhase; };
+	Dataset2D* GetTotalAmplitudeData(void);
+	Dataset2D* GetTotalPhaseData(void);
 
 	wxString GetNumerator(const unsigned int &i) const { return transferFunctions[i].first; };
 	wxString GetDenominator(const unsigned int &i) const { return transferFunctions[i].second; };
@@ -60,6 +60,7 @@ private:
 	ManagedList<Dataset2D> amplitudePlots;
 	ManagedList<Dataset2D> phasePlots;
 
+	bool totalNeedsUpdate;
 	Dataset2D totalAmplitude;
 	Dataset2D totalPhase;
 

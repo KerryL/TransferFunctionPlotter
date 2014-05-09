@@ -497,6 +497,7 @@ wxArrayString MainFrame::GetFileNameFromUser(wxString dialogTitle, wxString defa
 void MainFrame::AddButtonClicked(wxCommandEvent& WXUNUSED(event))
 {
 	TFDialog dialog(this);
+	dialog.CenterOnParent();
 	if (dialog.ShowModal() != wxID_OK)
 		return;
 
@@ -771,6 +772,22 @@ void MainFrame::UpdateCurve(unsigned int i, wxString numerator, wxString denomin
 	UpdatePlots();
 }
 
+//==========================================================================
+// Class:			MainFrame
+// Function:		UpdateSelectedTransferFunction
+//
+// Description:		Updates the specified transfer function.
+//
+// Input Arguments:
+//		i	= const unsigned int &
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
 void MainFrame::UpdateSelectedTransferFunction(const unsigned int &i)
 {
 	//selectedAmplitudePlot->RemoveAllCurves();
@@ -1013,9 +1030,26 @@ void MainFrame::GridDoubleClickEvent(wxGridEvent &event)
 	}
 }
 
+//==========================================================================
+// Class:			MainFrame
+// Function:		UpdateCurve
+//
+// Description:		Updates the TF associated with the specified curve.
+//
+// Input Arguments:
+//		i	= unsigned int
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
 void MainFrame::UpdateCurve(unsigned int i)
 {
 	TFDialog dialog(this, dataManager.GetNumerator(i), dataManager.GetDenominator(i));
+	dialog.CenterOnParent();
 	if (dialog.ShowModal() != wxID_OK)
 		return;
 

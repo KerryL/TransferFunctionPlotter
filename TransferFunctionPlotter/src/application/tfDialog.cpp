@@ -59,8 +59,11 @@ void TFDialog::CreateControls(const wxString &numerator, const wxString &denomin
 	SetMaxSize(wxSize(-1, GetSize().GetY()));
 	SetMinSize(wxSize(400, GetSize().GetY()));
 
+	// Required to call this after adjusting min and max sizes in order
+	// for the dialog to center properly
+	Fit();
+
 	numeratorCtrl->SetFocus();
-	Center();
 }
 
 bool TFDialog::TransferDataFromWindow(void)

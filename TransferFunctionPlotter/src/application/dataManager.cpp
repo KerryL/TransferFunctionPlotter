@@ -31,27 +31,11 @@ DataManager::DataManager()
 
 bool DataManager::AddTransferFunction(const wxString &numerator, const wxString &denominator)
 {
-	Dataset2D *magnitude = new Dataset2D;
-	Dataset2D *phase = new Dataset2D;
-
-	ExpressionTree expressionTree;
-	wxString errorString = expressionTree.Solve(AssembleTransferFunctionString(numerator, denominator),
-		minFreq, maxFreq, numberOfPoints, *magnitude, *phase);
-	if (!errorString.IsEmpty())
-	{
-		wxMessageBox(errorString);
-		delete magnitude;
-		delete phase;
-		return false;
-	}
-
-	amplitudePlots.Add(magnitude);
-	phasePlots.Add(phase);
+	amplitudePlots.Add(new Dataset2D(numberOfPoints));
+	phasePlots.Add(new Dataset2D(numberOfPoints));
 
 	transferFunctions.push_back(std::make_pair(numerator, denominator));
-	UpdateTotalTransferFunctionData();
-
-	return true;
+	return UpdateTransferFunction(amplitudePlots.GetCount() - 1, numerator, denominator);
 }
 
 bool DataManager::UpdateTransferFunction(const unsigned int &i, const wxString &numerator, const wxString &denominator)
@@ -59,9 +43,23 @@ bool DataManager::UpdateTransferFunction(const unsigned int &i, const wxString &
 	Dataset2D *magnitude = new Dataset2D;
 	Dataset2D *phase = new Dataset2D;
 
+	transferFunctions[i].first = numerator;
+	transferFunctions[i].second = denominator;
+
 	ExpressionTree expressionTree;
-	wxString errorString = expressionTree.Solve(AssembleTransferFunctionString(numerator, denominator),
-		minFreq, maxFreq, numberOfPoints, *magnitude, *phase);
+	wxString errorString;
+	if (frequencyHertz)
+		errorString = expressionTree.Solve(AssembleTransferFunctionString(transferFunctions[i]),
+			minFreq, maxFreq, numberOfPoints, *magnitude, *phase);
+	else
+	{
+		errorString = expressionTree.Solve(AssembleTransferFunctionString(transferFunctions[i]),
+			minFreq * 0.5 / PlotMath::pi, maxFreq * 0.5 / PlotMath::pi, numberOfPoints, *magnitude, *phase);
+
+		magnitude->MultiplyXData(2.0 * PlotMath::pi);
+		phase->MultiplyXData(2.0 * PlotMath::pi);
+	}
+
 	if (!errorString.IsEmpty())
 	{
 		wxMessageBox(errorString);
@@ -85,9 +83,7 @@ bool DataManager::UpdateTransferFunction(const unsigned int &i, const wxString &
 	delete magnitude;
 	delete phase;
 
-	transferFunctions[i].first = numerator;
-	transferFunctions[i].second = denominator;
-	UpdateTotalTransferFunctionData();
+	totalNeedsUpdate = true;
 
 	return true;
 }
@@ -149,12 +145,14 @@ void DataManager::UpdateTotalTransferFunctionData(void)
 		expressionTree.Solve(totalTF, minFreq, maxFreq, numberOfPoints, totalAmplitude, totalPhase);
 	else
 	{
-		expressionTree.Solve(totalTF, minFreq * 2.0 * PlotMath::pi,
-			maxFreq * 2.0 * PlotMath::pi, numberOfPoints, totalAmplitude, totalPhase);
+		expressionTree.Solve(totalTF, minFreq * 0.5 / PlotMath::pi,
+			maxFreq * 0.5 / PlotMath::pi, numberOfPoints, totalAmplitude, totalPhase);
 
-		totalAmplitude.MultiplyXData(0.5 / PlotMath::pi);
-		totalPhase.MultiplyXData(0.5 / PlotMath::pi);
+		totalAmplitude.MultiplyXData(2.0 * PlotMath::pi);
+		totalPhase.MultiplyXData(2.0 * PlotMath::pi);
 	}
+
+	totalNeedsUpdate = false;
 }
 
 void DataManager::RemoveAllTransferFunctions(void)
@@ -177,22 +175,9 @@ void DataManager::RemoveTransferFunctions(const unsigned int &i)
 
 void DataManager::UpdateAllTransferFunctionData(void)
 {
-	ExpressionTree expressionTree;
 	unsigned int i;
 	for (i = 0; i < amplitudePlots.GetCount(); i++)
-	{
-		if (frequencyHertz)
-			expressionTree.Solve(AssembleTransferFunctionString(transferFunctions[i]), minFreq, maxFreq, numberOfPoints,
-			*amplitudePlots[i], *phasePlots[i]);
-		else
-		{
-			expressionTree.Solve(AssembleTransferFunctionString(transferFunctions[i]), minFreq * 2.0 * PlotMath::pi,
-			maxFreq * 2.0 * PlotMath::pi, numberOfPoints, *amplitudePlots[i], *phasePlots[i]);
-
-			amplitudePlots[i]->MultiplyXData(0.5 / PlotMath::pi);
-			phasePlots[i]->MultiplyXData(0.5 / PlotMath::pi);
-		}
-	}
+		UpdateTransferFunction(i, transferFunctions[i].first, transferFunctions[i].second);
 
 	UpdateTotalTransferFunctionData();
 }
@@ -205,4 +190,18 @@ wxString DataManager::AssembleTransferFunctionString(const wxString &numerator, 
 wxString DataManager::AssembleTransferFunctionString(const std::pair<wxString, wxString> &tf) const
 {
 	return AssembleTransferFunctionString(tf.first, tf.second);
+}
+
+Dataset2D* DataManager::GetTotalAmplitudeData(void)
+{
+	if (totalNeedsUpdate)
+		UpdateTotalTransferFunctionData();
+	return &totalAmplitude;
+}
+
+Dataset2D* DataManager::GetTotalPhaseData(void)
+{
+	if (totalNeedsUpdate)
+		UpdateTotalTransferFunctionData();
+	return &totalPhase;
 }
