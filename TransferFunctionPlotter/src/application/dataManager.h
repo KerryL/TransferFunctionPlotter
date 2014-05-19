@@ -51,6 +51,8 @@ public:
 	void RemoveAllTransferFunctions(void);
 	void RemoveTransferFunctions(const unsigned int &i);
 
+	void UpdateTotalTransferFunctionData(void);
+
 private:
 	double minFreq, maxFreq;// [Hz]
 	bool frequencyHertz;
@@ -66,7 +68,6 @@ private:
 
 	std::vector<std::pair<wxString, wxString> > transferFunctions;
 	wxString ConstructTotalTransferFunction(void) const;
-	void UpdateTotalTransferFunctionData(void);
 	void UpdateAllTransferFunctionData(void);
 
 	wxString AssembleTransferFunctionString(const wxString &numerator, const wxString &denominator) const;

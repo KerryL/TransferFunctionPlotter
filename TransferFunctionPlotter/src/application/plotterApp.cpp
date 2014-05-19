@@ -42,7 +42,7 @@ IMPLEMENT_APP(TransferFunctionPlotterApp);
 const wxString TransferFunctionPlotterApp::transferFunctionPlotterTitle = _T("Transfer Function Plotter");
 const wxString TransferFunctionPlotterApp::transferFunctionPlotterName = _T("TransferFunctionPlotterApplication");
 const wxString TransferFunctionPlotterApp::creator = _T("Kerry Loux");
-const wxString TransferFunctionPlotterApp::versionString = _T("v0.2");
+const wxString TransferFunctionPlotterApp::versionString = _T("v0.3");
 
 //==========================================================================
 // Class:			TransferFunctionPlotterApp

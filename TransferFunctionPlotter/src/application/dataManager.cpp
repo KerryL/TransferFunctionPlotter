@@ -135,6 +135,9 @@ wxString DataManager::ConstructTotalTransferFunction(void) const
 
 void DataManager::UpdateTotalTransferFunctionData(void)
 {
+	if (!totalNeedsUpdate)
+		return;
+
 	wxString totalTF = ConstructTotalTransferFunction();
 
 	if (totalTF.IsEmpty())
@@ -194,14 +197,12 @@ wxString DataManager::AssembleTransferFunctionString(const std::pair<wxString, w
 
 Dataset2D* DataManager::GetTotalAmplitudeData(void)
 {
-	if (totalNeedsUpdate)
-		UpdateTotalTransferFunctionData();
+	UpdateTotalTransferFunctionData();
 	return &totalAmplitude;
 }
 
 Dataset2D* DataManager::GetTotalPhaseData(void)
 {
-	if (totalNeedsUpdate)
-		UpdateTotalTransferFunctionData();
+	UpdateTotalTransferFunctionData();
 	return &totalPhase;
 }

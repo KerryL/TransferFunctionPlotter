@@ -741,8 +741,10 @@ void MainFrame::AddCurve(wxString numerator, wxString denominator)
 		totalPhasePlot->AddCurve(*dataManager.GetTotalPhaseData());
 	}
 
-	UpdateSelectedTransferFunction(index - 1);
+	selectedAmplitudePlot->AddCurve(*dataManager.GetAmplitudeData(index - 1));
+	selectedPhasePlot->AddCurve(*dataManager.GetPhaseData(index - 1));
 	UpdateCurveProperties(index - 1, GetNextColor(index), true, false);
+	UpdatePlots();
 }
 
 //==========================================================================
@@ -770,30 +772,6 @@ void MainFrame::UpdateCurve(unsigned int i, wxString numerator, wxString denomin
 
 	optionsGrid->SetCellValue("(" + numerator + ")/(" + denominator + ")", i + 1, 0);
 	UpdatePlots();
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		UpdateSelectedTransferFunction
-//
-// Description:		Updates the specified transfer function.
-//
-// Input Arguments:
-//		i	= const unsigned int &
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::UpdateSelectedTransferFunction(const unsigned int &i)
-{
-	//selectedAmplitudePlot->RemoveAllCurves();
-	//selectedPhasePlot->RemoveAllCurves();
-	selectedAmplitudePlot->AddCurve(*dataManager.GetAmplitudeData(i));
-	selectedPhasePlot->AddCurve(*dataManager.GetPhaseData(i));
 }
 
 //==========================================================================
@@ -1821,6 +1799,7 @@ void MainFrame::RadioButtonChangeEvent(wxCommandEvent& WXUNUSED(event))
 //==========================================================================
 void MainFrame::UpdatePlots(void)
 {
+	dataManager.UpdateTotalTransferFunctionData();
 	selectedAmplitudePlot->UpdateDisplay();
 	selectedPhasePlot->UpdateDisplay();
 	totalAmplitudePlot->UpdateDisplay();
