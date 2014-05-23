@@ -295,7 +295,7 @@ unsigned int PlotMath::ApplyBitMask(const unsigned &value, const unsigned int &b
 //					dataset will be uninitialized.
 //
 // Input Arguments:
-//		data	= const std::vector<Complex>&
+//		data	= const std::vector<ComplexKRL>&
 //
 // Output Arguments:
 //		None
@@ -304,7 +304,7 @@ unsigned int PlotMath::ApplyBitMask(const unsigned &value, const unsigned int &b
 //		Dataset2D
 //
 //==========================================================================
-Dataset2D PlotMath::GetMagnitudeData(const std::vector<Complex> &data)
+Dataset2D PlotMath::GetMagnitudeData(const std::vector<ComplexKRL> &data)
 {
 	Dataset2D result(data.size());
 
@@ -324,7 +324,7 @@ Dataset2D PlotMath::GetMagnitudeData(const std::vector<Complex> &data)
 //					dataset will be uninitialized.
 //
 // Input Arguments:
-//		data	= const std::vector<Complex>&
+//		data	= const std::vector<ComplexKRL>&
 //
 // Output Arguments:
 //		None
@@ -333,7 +333,7 @@ Dataset2D PlotMath::GetMagnitudeData(const std::vector<Complex> &data)
 //		Dataset2D
 //
 //==========================================================================
-Dataset2D PlotMath::GetPhaseData(const std::vector<Complex> &data)
+Dataset2D PlotMath::GetPhaseData(const std::vector<ComplexKRL> &data)
 {
 	Dataset2D result(data.size());
 

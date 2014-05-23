@@ -67,8 +67,8 @@ namespace PlotMath
 	Dataset2D ApplyBitMask(const Dataset2D &data, const unsigned int &bit);
 	unsigned int ApplyBitMask(const unsigned &value, const unsigned int &bit);
 
-	Dataset2D GetMagnitudeData(const std::vector<Complex> &data);
-	Dataset2D GetPhaseData(const std::vector<Complex> &data);
+	Dataset2D GetMagnitudeData(const std::vector<ComplexKRL> &data);
+	Dataset2D GetPhaseData(const std::vector<ComplexKRL> &data);
 
 	Dataset2D ConvertToDecibels(const Dataset2D &data);
 
