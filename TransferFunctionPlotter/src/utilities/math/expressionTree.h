@@ -39,7 +39,7 @@ public:
 
 private:
 	std::queue<wxString> outputQueue;
-	std::vector<Complex> dataVector;
+	std::vector<ComplexKRL> dataVector;
 
 	void PrepareDataset(const double &minFreq, const double &maxFreq,
 		const unsigned int &resolution, Dataset2D &magnitude, Dataset2D &phase);
@@ -63,24 +63,24 @@ private:
 
 	void PushToStack(const double &value, std::stack<double> &doubleStack,
 		std::stack<bool> &useDoubleStack) const;
-	void PushToStack(const std::vector<Complex> &vector, std::stack<std::vector<Complex> > &vectorStack,
+	void PushToStack(const std::vector<ComplexKRL> &vector, std::stack<std::vector<ComplexKRL> > &vectorStack,
 		std::stack<bool> &useDoubleStack) const;
-	bool PopFromStack(std::stack<double> &doubleStack, std::stack<std::vector<Complex> > &vectorStack,
-		std::stack<bool> &useDoubleStack, double &value, std::vector<Complex> &vector) const;
+	bool PopFromStack(std::stack<double> &doubleStack, std::stack<std::vector<ComplexKRL> > &vectorStack,
+		std::stack<bool> &useDoubleStack, double &value, std::vector<ComplexKRL> &vector) const;
 
 	double ApplyOperation(const wxString &operation, const double &first, const double &second) const;
-	std::vector<Complex> ApplyOperation(const wxString &operation, const std::vector<Complex> &first, const double &second) const;
-	std::vector<Complex> ApplyOperation(const wxString &operation, const double &first, const std::vector<Complex> &second) const;
-	std::vector<Complex> ApplyOperation(const wxString &operation, const std::vector<Complex> &first,
-		const std::vector<Complex> &second) const;
+	std::vector<ComplexKRL> ApplyOperation(const wxString &operation, const std::vector<ComplexKRL> &first, const double &second) const;
+	std::vector<ComplexKRL> ApplyOperation(const wxString &operation, const double &first, const std::vector<ComplexKRL> &second) const;
+	std::vector<ComplexKRL> ApplyOperation(const wxString &operation, const std::vector<ComplexKRL> &first,
+		const std::vector<ComplexKRL> &second) const;
 
 	bool EvaluateNext(const wxString &next, std::stack<double> &doubleStack,
-		std::stack<std::vector<Complex> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
+		std::stack<std::vector<ComplexKRL> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
 	bool EvaluateOperator(const wxString &operation, std::stack<double> &doubleStack,
-		std::stack<std::vector<Complex> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
+		std::stack<std::vector<ComplexKRL> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
 	bool EvaluateNumber(const wxString &number, std::stack<double> &doubleStack,
 		std::stack<bool> &useDoubleStack, wxString &errorString) const;
-	bool EvaluateS(std::stack<std::vector<Complex> > &vectorStack,
+	bool EvaluateS(std::stack<std::vector<ComplexKRL> > &vectorStack,
 		std::stack<bool> &useDoubleStack) const;
 
 	bool ParenthesesBalanced(const wxString &expression) const;

@@ -7,11 +7,14 @@
 
 ===================================================================================*/
 
-// File:  complex.cpp
+// File:  complex_krl.cpp
 // Created:  5/2/2011
 // Author:  K. Loux
 // Description:  Contains class functionality for complex number class.
 // History:
+
+// Local headers
+#include "utilities/math/complex.h"
 
 // Standard C++ headers
 #include <iostream>
@@ -19,16 +22,13 @@
 // wxWidgets headers
 #include <wx/wx.h>
 
-// Local headers
-#include "utilities/math/complex.h"
-
 using namespace std;
 
 //==========================================================================
-// Class:			Complex
-// Function:		Complex
+// Class:			ComplexKRL
+// Function:		ComplexKRL
 //
-// Description:		Constructor for the Complex class.
+// Description:		Constructor for the ComplexKRL class.
 //
 // Input Arguments:
 //		None
@@ -40,15 +40,15 @@ using namespace std;
 //		None
 //
 //==========================================================================
-Complex::Complex()
+ComplexKRL::ComplexKRL()
 {
 }
 
 //==========================================================================
-// Class:			Complex
-// Function:		Complex
+// Class:			ComplexKRL
+// Function:		ComplexKRL
 //
-// Description:		Constructor for the Complex class.
+// Description:		Constructor for the ComplexKRL class.
 //
 // Input Arguments:
 //		_real		= const double& real component of the complex number
@@ -61,7 +61,7 @@ Complex::Complex()
 //		None
 //
 //==========================================================================
-Complex::Complex(const double &_real, const double &_imaginary)
+ComplexKRL::ComplexKRL(const double &_real, const double &_imaginary)
 {
 	// Assign the arguments to the class members
 	real = _real;
@@ -69,10 +69,10 @@ Complex::Complex(const double &_real, const double &_imaginary)
 }
 
 //==========================================================================
-// Class:			Complex
-// Function:		~Complex
+// Class:			ComplexKRL
+// Function:		~ComplexKRL
 //
-// Description:		Destructor for the Complex class.
+// Description:		Destructor for the ComplexKRL class.
 //
 // Input Arguments:
 //		None
@@ -84,15 +84,15 @@ Complex::Complex(const double &_real, const double &_imaginary)
 //		None
 //
 //==========================================================================
-Complex::~Complex()
+ComplexKRL::~ComplexKRL()
 {
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		Constant Definitions
 //
-// Description:		Defines class level constants for the Complex class.
+// Description:		Defines class level constants for the ComplexKRL class.
 //
 // Input Arguments:
 //		None
@@ -104,17 +104,17 @@ Complex::~Complex()
 //		None
 //
 //==========================================================================
-const Complex Complex::i(0.0, 1.0);
+const ComplexKRL ComplexKRL::i(0.0, 1.0);
 
 //==========================================================================
-// Class:			friend of Complex
+// Class:			friend of ComplexKRL
 // Function:		operator <<
 //
 // Description:		Writes the value of Target to a stream.
 //
 // Input Arguments:
 //		writeOut	= ostream& to write out to
-//		complex		= const Complex& value to be written to the stream
+//		complex		= const ComplexKRL& value to be written to the stream
 //
 // Output Arguments:
 //		None
@@ -123,7 +123,7 @@ const Complex Complex::i(0.0, 1.0);
 //		&ostream containing the formatted value
 //
 //==========================================================================
-ostream &operator << (ostream &writeOut, const Complex &complex)
+ostream &operator << (ostream &writeOut, const ComplexKRL &complex)
 {
 	writeOut << complex.Print();
 
@@ -131,7 +131,7 @@ ostream &operator << (ostream &writeOut, const Complex &complex)
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		Print
 //
 // Description:		Prints this object to a string.
@@ -146,7 +146,7 @@ ostream &operator << (ostream &writeOut, const Complex &complex)
 //		wxString containing the formatted value of this object
 //
 //==========================================================================
-wxString Complex::Print(void) const
+wxString ComplexKRL::Print(void) const
 {
 	wxString temp;
 
@@ -159,13 +159,13 @@ wxString Complex::Print(void) const
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator +
 //
-// Description:		Addition operator for the Complex class.
+// Description:		Addition operator for the ComplexKRL class.
 //
 // Input Arguments:
-//		complex	= const Complex& to add to this
+//		complex	= const ComplexKRL& to add to this
 //
 // Output Arguments:
 //		None
@@ -174,10 +174,10 @@ wxString Complex::Print(void) const
 //		const Complex result of the addition
 //
 //==========================================================================
-const Complex Complex::operator + (const Complex &complex) const
+const ComplexKRL ComplexKRL::operator + (const ComplexKRL &complex) const
 {
 	// Make a copy of this object
-	Complex temp = *this;
+	ComplexKRL temp = *this;
 
 	// Do the addition
 	temp += complex;
@@ -186,25 +186,25 @@ const Complex Complex::operator + (const Complex &complex) const
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator -
 //
-// Description:		Subraction operator for the Complex class.
+// Description:		Subraction operator for the ComplexKRL class.
 //
 // Input Arguments:
-//		complex	= const Complex& to subtract from this
+//		complex	= const ComplexKRL& to subtract from this
 //
 // Output Arguments:
 //		None
 //
 // Return Value:
-//		const Complex result of the subtraction
+//		const ComplexKRL result of the subtraction
 //
 //==========================================================================
-const Complex Complex::operator - (const Complex &complex) const
+const ComplexKRL ComplexKRL::operator - (const ComplexKRL &complex) const
 {
 	// Make a copy of this object
-	Complex temp = *this;
+	ComplexKRL temp = *this;
 
 	// Do the subtraction
 	temp -= complex;
@@ -213,25 +213,25 @@ const Complex Complex::operator - (const Complex &complex) const
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator *
 //
-// Description:		Multiplication operator for the Complex class.
+// Description:		Multiplication operator for the ComplexKRL class.
 //
 // Input Arguments:
-//		complex	= const Complex& to multiply with this
+//		complex	= const ComplexKRL& to multiply with this
 //
 // Output Arguments:
 //		None
 //
 // Return Value:
-//		const Complex result of the multiplication
+//		const ComplexKRL result of the multiplication
 //
 //==========================================================================
-const Complex Complex::operator * (const Complex &complex) const
+const ComplexKRL ComplexKRL::operator * (const ComplexKRL &complex) const
 {
 	// Make a copy of this object
-	Complex temp = *this;
+	ComplexKRL temp = *this;
 
 	// Do the multiplication
 	temp *= complex;
@@ -240,25 +240,25 @@ const Complex Complex::operator * (const Complex &complex) const
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator /
 //
-// Description:		Division operator for the Complex class.
+// Description:		Division operator for the ComplexKRL class.
 //
 // Input Arguments:
-//		complex	= const Complex& to divide by this
+//		complex	= const ComplexKRL& to divide by this
 //
 // Output Arguments:
 //		None
 //
 // Return Value:
-//		const Complex result of the division
+//		const ComplexKRL result of the division
 //
 //==========================================================================
-const Complex Complex::operator / (const Complex &complex) const
+const ComplexKRL ComplexKRL::operator / (const ComplexKRL &complex) const
 {
 	// Make a copy of this object
-	Complex temp = *this;
+	ComplexKRL temp = *this;
 
 	// Do the division
 	temp /= complex;
@@ -267,7 +267,7 @@ const Complex Complex::operator / (const Complex &complex) const
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		GetPolarLength
 //
 // Description:		Converts to polar coordinates, returns the length (r).
@@ -282,13 +282,13 @@ const Complex Complex::operator / (const Complex &complex) const
 //		double
 //
 //==========================================================================
-double Complex::GetPolarLength(void) const
+double ComplexKRL::GetPolarLength(void) const
 {
 	return sqrt(real * real + imaginary * imaginary);
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		GetPolarAngle
 //
 // Description:		Converts to polar coordinates, returns the angle (theta).
@@ -300,16 +300,16 @@ double Complex::GetPolarLength(void) const
 //		None
 //
 // Return Value:
-//		double
+//		double [rad]
 //
 //==========================================================================
-double Complex::GetPolarAngle(void) const
+double ComplexKRL::GetPolarAngle(void) const
 {
 	return atan2(imaginary, real);
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		ToPower
 //
 // Description:		Raises this object to the specified power.
@@ -321,10 +321,10 @@ double Complex::GetPolarAngle(void) const
 //		None
 //
 // Return Value:
-//		Complex& result of the power
+//		ComplexKRL& result of the power
 //
 //==========================================================================
-Complex& Complex::ToPower(const double &power)
+ComplexKRL& ComplexKRL::ToPower(const double &power)
 {
 	// Convert this from Cartesian to polar form
 	double r = GetPolarLength();
@@ -342,7 +342,7 @@ Complex& Complex::ToPower(const double &power)
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		ToPower
 //
 // Description:		Raises this object to the specified power (const version).
@@ -354,36 +354,36 @@ Complex& Complex::ToPower(const double &power)
 //		None
 //
 // Return Value:
-//		const Complex result of the power
+//		const ComplexKRL result of the power
 //
 //==========================================================================
-const Complex Complex::ToPower(const double &power) const
+const ComplexKRL ComplexKRL::ToPower(const double &power) const
 {
-	Complex result(*this);
+	ComplexKRL result(*this);
 	result.ToPower(power);
 
 	return result;
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		ToPower
 //
 // Description:		Raises this object to the specified complex power.
 //
 // Input Arguments:
-//		power	= const Complex& specifiying the power to which this will be raised
+//		power	= const ComplexKRL& specifiying the power to which this will be raised
 //
 // Output Arguments:
 //		None
 //
 // Return Value:
-//		Complex& result of the power
+//		ComplexKRL& result of the power
 //
 //==========================================================================
-Complex& Complex::ToPower(const Complex &power)
+ComplexKRL& ComplexKRL::ToPower(const ComplexKRL &power)
 {
-	Complex original(*this);
+	ComplexKRL original(*this);
 
 	double r = GetPolarLength();
 	double theta = GetPolarAngle();
@@ -398,45 +398,45 @@ Complex& Complex::ToPower(const Complex &power)
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		ToPower
 //
 // Description:		Raises this object to the specified complex power (const version).
 //
 // Input Arguments:
-//		power	= const Complex& specifiying the power to which this will be raised
+//		power	= const ComplexKRL& specifiying the power to which this will be raised
 //
 // Output Arguments:
 //		None
 //
 // Return Value:
-//		const Complex result of the power
+//		const ComplexKRL result of the power
 //
 //==========================================================================
-const Complex Complex::ToPower(const Complex &power) const
+const ComplexKRL ComplexKRL::ToPower(const ComplexKRL &power) const
 {
-	Complex result(*this);
+	ComplexKRL result(*this);
 
 	return result.ToPower(power);
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator +=
 //
-// Description:		Addition assignment operator for the Complex class.
+// Description:		Addition assignment operator for the ComplexKRL class.
 //
 // Input Arguments:
-//		complex	= const Complex& to add to this
+//		complex	= const ComplexKRL& to add to this
 //
 // Output Arguments:
 //		None
 //
 // Return Value:
-//		Complex& result of the addition
+//		ComplexKRL& result of the addition
 //
 //==========================================================================
-Complex& Complex::operator += (const Complex &complex)
+ComplexKRL& ComplexKRL::operator += (const ComplexKRL &complex)
 {
 	// Add the real components
 	real += complex.real;
@@ -448,22 +448,22 @@ Complex& Complex::operator += (const Complex &complex)
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator -=
 //
-// Description:		Subraction assignment operator for the Complex class.
+// Description:		Subraction assignment operator for the ComplexKRL class.
 //
 // Input Arguments:
-//		complex	= const Complex& to subtract from this
+//		complex	= const ComplexKRL& to subtract from this
 //
 // Output Arguments:
 //		None
 //
 // Return Value:
-//		Complex& result of the subtraction
+//		ComplexKRL& result of the subtraction
 //
 //==========================================================================
-Complex& Complex::operator -= (const Complex &complex)
+ComplexKRL& ComplexKRL::operator -= (const ComplexKRL &complex)
 {
 	// Subtract the real components
 	real -= complex.real;
@@ -475,10 +475,10 @@ Complex& Complex::operator -= (const Complex &complex)
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator *=
 //
-// Description:		Multiplication assignment operator for the Complex class.
+// Description:		Multiplication assignment operator for the ComplexKRL class.
 //
 // Input Arguments:
 //		complex	= const Complex& to multiply by this
@@ -487,10 +487,10 @@ Complex& Complex::operator -= (const Complex &complex)
 //		None
 //
 // Return Value:
-//		Complex& result of the multiplication
+//		ComplexKRL& result of the multiplication
 //
 //==========================================================================
-Complex& Complex::operator *= (const Complex &complex)
+ComplexKRL& ComplexKRL::operator *= (const ComplexKRL &complex)
 {
 	double temp = real;
 
@@ -506,22 +506,22 @@ Complex& Complex::operator *= (const Complex &complex)
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator /=
 //
-// Description:		Division assignment operator for the Complex class.
+// Description:		Division assignment operator for the ComplexKRL class.
 //
 // Input Arguments:
-//		complex	= const Complex& to divide by this
+//		complex	= const ComplexKRL& to divide by this
 //
 // Output Arguments:
 //		None
 //
 // Return Value:
-//		Complex& result of the division
+//		ComplexKRL& result of the division
 //
 //==========================================================================
-Complex& Complex::operator /= (const Complex &complex)
+ComplexKRL& ComplexKRL::operator /= (const ComplexKRL &complex)
 {
 	double temp = real;
 
@@ -537,13 +537,13 @@ Complex& Complex::operator /= (const Complex &complex)
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator ==
 //
-// Description:		Equal to comparison operator for the Complex class.
+// Description:		Equal to comparison operator for the ComplexKRL class.
 //
 // Input Arguments:
-//		complex	= const Complex& to compare to this
+//		complex	= const ComplexKRL& to compare to this
 //
 // Output Arguments:
 //		None
@@ -552,7 +552,7 @@ Complex& Complex::operator /= (const Complex &complex)
 //		bool, true for equal to, false for not equal to
 //
 //==========================================================================
-bool Complex::operator == (const Complex &complex) const
+bool ComplexKRL::operator == (const ComplexKRL &complex) const
 {
 	// Check to see if both the real and imaginary components are equal
 	if (real == complex.real && imaginary == complex.imaginary)
@@ -562,13 +562,13 @@ bool Complex::operator == (const Complex &complex) const
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator !=
 //
-// Description:		Not equal to comparison operator for the Complex class.
+// Description:		Not equal to comparison operator for the ComplexKRL class.
 //
 // Input Arguments:
-//		complex	= const Complex& to compare to this
+//		complex	= const ComplexKRL& to compare to this
 //
 // Output Arguments:
 //		None
@@ -577,13 +577,13 @@ bool Complex::operator == (const Complex &complex) const
 //		bool, false for equal to, true for not equal to
 //
 //==========================================================================
-bool Complex::operator != (const Complex &complex) const
+bool ComplexKRL::operator != (const ComplexKRL &complex) const
 {
 	return !(*this == complex);
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		GetConjugate
 //
 // Description:		Returns the complex conjugate of this object.
@@ -595,13 +595,13 @@ bool Complex::operator != (const Complex &complex) const
 //		None
 //
 // Return Value:
-//		const Complex with the same real part as this and an imaginary component
+//		const ComplexKRL with the same real part as this and an imaginary component
 //		with opposite magnitude as this
 //
 //==========================================================================
-const Complex Complex::GetConjugate(void) const
+const ComplexKRL ComplexKRL::GetConjugate(void) const
 {
-	Complex temp;
+	ComplexKRL temp;
 
 	// Direct assignment of the real component
 	temp.real = real;
@@ -613,10 +613,10 @@ const Complex Complex::GetConjugate(void) const
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator +
 //
-// Description:		Addition operator for the Complex class.
+// Description:		Addition operator for the ComplexKRL class.
 //
 // Input Arguments:
 //		value	= const double& to add to this
@@ -625,12 +625,12 @@ const Complex Complex::GetConjugate(void) const
 //		None
 //
 // Return Value:
-//		const Complex result of the addition
+//		const ComplexKRL result of the addition
 //
 //==========================================================================
-const Complex Complex::operator + (const double &value) const
+const ComplexKRL ComplexKRL::operator + (const double &value) const
 {
-	Complex temp;
+	ComplexKRL temp;
 
 	// Add the real component
 	temp.real = real + value;
@@ -642,10 +642,10 @@ const Complex Complex::operator + (const double &value) const
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator -
 //
-// Description:		Subtraction operator for the Complex class.
+// Description:		Subtraction operator for the ComplexKRL class.
 //
 // Input Arguments:
 //		value	= const double& to subtract from this
@@ -654,12 +654,12 @@ const Complex Complex::operator + (const double &value) const
 //		None
 //
 // Return Value:
-//		const Complex result of the subtraction
+//		const ComplexKRL result of the subtraction
 //
 //==========================================================================
-const Complex Complex::operator - (const double &value) const
+const ComplexKRL ComplexKRL::operator - (const double &value) const
 {
-	Complex temp;
+	ComplexKRL temp;
 
 	// Subtract the real component
 	temp.real = real - value;
@@ -671,10 +671,10 @@ const Complex Complex::operator - (const double &value) const
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator *
 //
-// Description:		Multiplication operator for the Complex class.
+// Description:		Multiplication operator for the ComplexKRL class.
 //
 // Input Arguments:
 //		value	= const double& to multiply by this
@@ -683,12 +683,12 @@ const Complex Complex::operator - (const double &value) const
 //		None
 //
 // Return Value:
-//		const Complex result of the multiplication
+//		const ComplexKRL result of the multiplication
 //
 //==========================================================================
-const Complex Complex::operator * (const double &value) const
+const ComplexKRL ComplexKRL::operator * (const double &value) const
 {
-	Complex temp;
+	ComplexKRL temp;
 
 	// Perform the multiplication on both components
 	temp.real = real * value;
@@ -698,10 +698,10 @@ const Complex Complex::operator * (const double &value) const
 }
 
 //==========================================================================
-// Class:			Complex
+// Class:			ComplexKRL
 // Function:		operator /
 //
-// Description:		Division operator for the Complex class.
+// Description:		Division operator for the ComplexKRL class.
 //
 // Input Arguments:
 //		value	= const double& to divide by this
@@ -710,12 +710,12 @@ const Complex Complex::operator * (const double &value) const
 //		None
 //
 // Return Value:
-//		const Complex result of the division
+//		const ComplexKRL result of the division
 //
 //==========================================================================
-const Complex Complex::operator / (const double &value) const
+const ComplexKRL ComplexKRL::operator / (const double &value) const
 {
-	Complex temp;
+	ComplexKRL temp;
 
 	// Perform the division on both components
 	temp.real = real / value;

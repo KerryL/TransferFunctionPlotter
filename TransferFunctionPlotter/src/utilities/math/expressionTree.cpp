@@ -185,7 +185,7 @@ void ExpressionTree::PrepareDataset(const double &minFreq, const double &maxFreq
 	const unsigned int &resolution, Dataset2D &magnitude, Dataset2D &phase)
 {
 	magnitude.Resize(resolution);
-	dataVector.assign(resolution, Complex(0.0, 0.0));
+	dataVector.assign(resolution, ComplexKRL(0.0, 0.0));
 
 	unsigned int i;
 	for (i = 0; i < resolution; i++)
@@ -193,7 +193,7 @@ void ExpressionTree::PrepareDataset(const double &minFreq, const double &maxFreq
 		magnitude.GetXPointer()[i] = pow(10.0,
 			(double)i / (double)(resolution - 1) * log10(maxFreq / minFreq) + log10(minFreq));
 		magnitude.GetYPointer()[i] = 0.0;
-		dataVector[i] = Complex(0.0, magnitude.GetXData(i) * 2.0 * PlotMath::pi);
+		dataVector[i] = ComplexKRL(0.0, magnitude.GetXData(i) * 2.0 * PlotMath::pi);
 	}
 
 	phase = magnitude;
@@ -288,7 +288,7 @@ wxString ExpressionTree::EvaluateExpression(void)
 	wxString next, errorString;
 
 	std::stack<double> doubleStack;
-	std::stack<std::vector<Complex> > vectorStack;
+	std::stack<std::vector<ComplexKRL> > vectorStack;
 	std::stack<bool> useDoubleStack;
 
 	if (NextIsOperator(outputQueue.front()))// Special handling in case of "-3*..."
@@ -605,8 +605,8 @@ void ExpressionTree::PushToStack(const double &value, std::stack<double> &double
 // Description:		Pushes the specified dataset onto the stack.
 //
 // Input Arguments:
-//		vector			= const std::vector<Complex>&
-//		vectorStack		= std::stack<std::vector<Complex> >&
+//		vector			= const std::vector<ComplexKRL>&
+//		vectorStack		= std::stack<std::vector<ComplexKRL> >&
 //		useDoubleStack	= std::stack<bool>&
 //
 // Output Arguments:
@@ -616,7 +616,7 @@ void ExpressionTree::PushToStack(const double &value, std::stack<double> &double
 //		None
 //
 //==========================================================================
-void ExpressionTree::PushToStack(const std::vector<Complex> &vector, std::stack<std::vector<Complex> > &vectorStack,
+void ExpressionTree::PushToStack(const std::vector<ComplexKRL> &vector, std::stack<std::vector<ComplexKRL> > &vectorStack,
 	std::stack<bool> &useDoubleStack) const
 {
 	vectorStack.push(vector);
@@ -631,19 +631,19 @@ void ExpressionTree::PushToStack(const std::vector<Complex> &vector, std::stack<
 //
 // Input Arguments:
 //		doubleStack		= std::stack<double>&
-//		vectorStack		= std::stack<std::vector<Complex> >&
+//		vectorStack		= std::stack<std::vector<ComplexKRL> >&
 //		useDoubleStack	= std::stack<bool>&
 //
 // Output Arguments:
 //		value			= double&
-//		vector			= std::vector<Complex>&
+//		vector			= std::vector<ComplexKRL>&
 //
 // Return Value:
 //		bool, true if a double was popped, false if a dataset was popped
 //
 //==========================================================================
-bool ExpressionTree::PopFromStack(std::stack<double> &doubleStack, std::stack<std::vector<Complex> > &vectorStack,
-	std::stack<bool> &useDoubleStack, double &value, std::vector<Complex> &vector) const
+bool ExpressionTree::PopFromStack(std::stack<double> &doubleStack, std::stack<std::vector<ComplexKRL> > &vectorStack,
+	std::stack<bool> &useDoubleStack, double &value, std::vector<ComplexKRL> &vector) const
 {
 	assert(!useDoubleStack.empty());
 
@@ -710,7 +710,7 @@ double ExpressionTree::ApplyOperation(const wxString &operation,
 //
 // Input Arguments:
 //		operation	= const wxString& describing the function to apply
-//		first		= const const std::vector<Complex>&
+//		first		= const const std::vector<ComplexKRL>&
 //		second		= const double&
 //
 // Output Arguments:
@@ -720,21 +720,21 @@ double ExpressionTree::ApplyOperation(const wxString &operation,
 //		double containing the result of the operation
 //
 //==========================================================================
-std::vector<Complex> ExpressionTree::ApplyOperation(const wxString &operation,
-	const std::vector<Complex> &first, const double &second) const
+std::vector<ComplexKRL> ExpressionTree::ApplyOperation(const wxString &operation,
+	const std::vector<ComplexKRL> &first, const double &second) const
 {
-	std::vector<Complex> vector(first.size(), Complex(second, 0.0));
+	std::vector<ComplexKRL> vector(first.size(), ComplexKRL(second, 0.0));
 	if (operation.Cmp(_T("+")) == 0)
-		return PlotMath::operator+<Complex>(vector, first);
+		return PlotMath::operator+<ComplexKRL>(vector, first);
 	else if (operation.Cmp(_T("-")) == 0)
-		return PlotMath::operator-<Complex>(vector, first);
+		return PlotMath::operator-<ComplexKRL>(vector, first);
 	else if (operation.Cmp(_T("*")) == 0)
-		return PlotMath::operator*<Complex>(vector, first);
+		return PlotMath::operator*<ComplexKRL>(vector, first);
 	else if (operation.Cmp(_T("/")) == 0)
-		return PlotMath::operator/<Complex>(vector, first);
+		return PlotMath::operator/<ComplexKRL>(vector, first);
 	else if (operation.Cmp(_T("^")) == 0)
 	{
-		std::vector<Complex> result(first.size());
+		std::vector<ComplexKRL> result(first.size());
 		unsigned int i;
 		for (i = 0; i < result.size(); i++)
 			result[i] = vector[i].ToPower(first[i]);
@@ -754,7 +754,7 @@ std::vector<Complex> ExpressionTree::ApplyOperation(const wxString &operation,
 // Input Arguments:
 //		operation	= const wxString& describing the function to apply
 //		first		= const double&
-//		second		= const std::vector<Complex>&
+//		second		= const std::vector<ComplexKRL>&
 //
 // Output Arguments:
 //		None
@@ -763,21 +763,21 @@ std::vector<Complex> ExpressionTree::ApplyOperation(const wxString &operation,
 //		double containing the result of the operation
 //
 //==========================================================================
-std::vector<Complex> ExpressionTree::ApplyOperation(const wxString &operation,
-	const double &first, const std::vector<Complex> &second) const
+std::vector<ComplexKRL> ExpressionTree::ApplyOperation(const wxString &operation,
+	const double &first, const std::vector<ComplexKRL> &second) const
 {
-	std::vector<Complex> vector(second.size(), Complex(first, 0.0));
+	std::vector<ComplexKRL> vector(second.size(), ComplexKRL(first, 0.0));
 	if (operation.Cmp(_T("+")) == 0)
-		return PlotMath::operator+<Complex>(second, vector);
+		return PlotMath::operator+<ComplexKRL>(second, vector);
 	else if (operation.Cmp(_T("-")) == 0)
-		return PlotMath::operator-<Complex>(second, vector);
+		return PlotMath::operator-<ComplexKRL>(second, vector);
 	else if (operation.Cmp(_T("*")) == 0)
-		return PlotMath::operator*<Complex>(second, vector);
+		return PlotMath::operator*<ComplexKRL>(second, vector);
 	else if (operation.Cmp(_T("/")) == 0)
-		return PlotMath::operator/<Complex>(second, vector);
+		return PlotMath::operator/<ComplexKRL>(second, vector);
 	else if (operation.Cmp(_T("^")) == 0)
 	{
-		std::vector<Complex> result(second.size());
+		std::vector<ComplexKRL> result(second.size());
 		unsigned int i;
 		for (i = 0; i < result.size(); i++)
 			result[i] = second[i].ToPower(vector[i]);
@@ -796,8 +796,8 @@ std::vector<Complex> ExpressionTree::ApplyOperation(const wxString &operation,
 //
 // Input Arguments:
 //		operation	= const wxString& describing the function to apply
-//		first		= const const std::vector<Complex>&
-//		second		= const const std::vector<Complex>&
+//		first		= const const std::vector<ComplexKRL>&
+//		second		= const const std::vector<ComplexKRL>&
 //
 // Output Arguments:
 //		None
@@ -806,20 +806,20 @@ std::vector<Complex> ExpressionTree::ApplyOperation(const wxString &operation,
 //		double containing the result of the operation
 //
 //==========================================================================
-std::vector<Complex> ExpressionTree::ApplyOperation(const wxString &operation,
-	const std::vector<Complex> &first, const std::vector<Complex> &second) const
+std::vector<ComplexKRL> ExpressionTree::ApplyOperation(const wxString &operation,
+	const std::vector<ComplexKRL> &first, const std::vector<ComplexKRL> &second) const
 {
 	if (operation.Cmp(_T("+")) == 0)
-		return PlotMath::operator+<Complex>(second, first);
+		return PlotMath::operator+<ComplexKRL>(second, first);
 	else if (operation.Cmp(_T("-")) == 0)
-		return PlotMath::operator-<Complex>(second, first);
+		return PlotMath::operator-<ComplexKRL>(second, first);
 	else if (operation.Cmp(_T("*")) == 0)
-		return PlotMath::operator*<Complex>(second, first);
+		return PlotMath::operator*<ComplexKRL>(second, first);
 	else if (operation.Cmp(_T("/")) == 0)
-		return PlotMath::operator/<Complex>(second, first);
+		return PlotMath::operator/<ComplexKRL>(second, first);
 	else if (operation.Cmp(_T("^")) == 0)
 	{
-		std::vector<Complex> result(first.size());
+		std::vector<ComplexKRL> result(first.size());
 		unsigned int i;
 		for (i = 0; i < result.size(); i++)
 			result[i] = second[i].ToPower(first[i]);
@@ -850,10 +850,10 @@ std::vector<Complex> ExpressionTree::ApplyOperation(const wxString &operation,
 //
 //==========================================================================
 bool ExpressionTree::EvaluateOperator(const wxString &operation, std::stack<double> &doubleStack,
-	std::stack<std::vector<Complex> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const
+	std::stack<std::vector<ComplexKRL> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const
 {
 	double value1, value2;
-	std::vector<Complex> vector1, vector2;
+	std::vector<ComplexKRL> vector1, vector2;
 
 	if (useDoubleStack.size() < 2)
 	{
@@ -915,7 +915,7 @@ bool ExpressionTree::EvaluateNumber(const wxString &number, std::stack<double> &
 // Description:		Evaluates the frequency specified.
 //
 // Input Arguments:
-//		vectorStack		= std::stack<std::vector<Complex> >&
+//		vectorStack		= std::stack<std::vector<ComplexKRL> >&
 //		useDoubleStack	= std::stack<bool>&
 //
 // Output Arguments:
@@ -925,7 +925,7 @@ bool ExpressionTree::EvaluateNumber(const wxString &number, std::stack<double> &
 //		bool, true for success, false otherwise
 //
 //==========================================================================
-bool ExpressionTree::EvaluateS(std::stack<std::vector<Complex> > &vectorStack,
+bool ExpressionTree::EvaluateS(std::stack<std::vector<ComplexKRL> > &vectorStack,
 	std::stack<bool> &useDoubleStack) const
 {
 	PushToStack(dataVector, vectorStack, useDoubleStack);
@@ -952,7 +952,7 @@ bool ExpressionTree::EvaluateS(std::stack<std::vector<Complex> > &vectorStack,
 //
 //==========================================================================
 bool ExpressionTree::EvaluateNext(const wxString &next, std::stack<double> &doubleStack,
-		std::stack<std::vector<Complex> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const
+		std::stack<std::vector<ComplexKRL> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const
 {
 	if (NextIsOperator(next))
 		return EvaluateOperator(next, doubleStack, vectorStack, useDoubleStack, errorString);

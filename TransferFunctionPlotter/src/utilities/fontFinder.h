@@ -21,7 +21,7 @@
 class wxString;
 
 // Local headers
-#include "utilities/machineDefinitions.h"
+#include "machineDefinitions.h"
 
 class FontFinder
 {

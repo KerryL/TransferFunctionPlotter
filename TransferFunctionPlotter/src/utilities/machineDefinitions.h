@@ -24,9 +24,9 @@
 
 // NOTE:  See wxPlatformInfo for run-time determination of OS address width
 
-#ifdef _TF_PLOTTER_32_BIT_
+#ifdef _TFPLOTTER_32_BIT_
 #define TF_ULONG unsigned long
-#elif _TF_PLOTTER_64_BIT_
+#elif _TFPLOTTER_64_BIT_
 #define TF_ULONG unsigned int
 #else
 #error "Must define preprocessor flags _TF_PLOTTER_32_BIT_ or _TF_PLOTTER_64_BIT_"
