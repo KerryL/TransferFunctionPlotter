@@ -201,7 +201,7 @@ void PlotObject::CreateFontObjects(const wxString &fontFile)
 	}
 	else
 	{
-		titleFont->FaceSize(18);
+		titleFont->FaceSize(14);
 		titleFont->CharMap(FT_ENCODING_UNICODE);
 	}
 }
@@ -491,9 +491,9 @@ void PlotObject::FormatBottomBasics(const Axis::TickStyle &tickStyle)
 	axisBottom->SetTickStyle(tickStyle);
 
 	if (axisBottom->GetLabel().IsEmpty())
-		axisBottom->SetOffsetFromWindowEdge(50);
+		axisBottom->SetOffsetFromWindowEdge(25);
 	else
-		axisBottom->SetOffsetFromWindowEdge(75);
+		axisBottom->SetOffsetFromWindowEdge(50);
 }
 
 //==========================================================================
@@ -518,9 +518,9 @@ void PlotObject::FormatTopBasics(const Axis::TickStyle &tickStyle)
 	axisTop->SetTickStyle(tickStyle);
 
 	if (axisTop->GetLabel().IsEmpty())
-		axisTop->SetOffsetFromWindowEdge(50);
+		axisTop->SetOffsetFromWindowEdge(25);
 	else
-		axisTop->SetOffsetFromWindowEdge(75);
+		axisTop->SetOffsetFromWindowEdge(50);
 
 	if (!titleObject->GetText().IsEmpty())
 		axisTop->SetOffsetFromWindowEdge(axisTop->GetOffsetFromWindowEdge() + 15);

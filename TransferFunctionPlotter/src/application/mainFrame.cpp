@@ -169,7 +169,7 @@ PlotRenderer* MainFrame::CreatePlotArea(wxWindow *parent, const wxString &title,
 	PlotRenderer *plotArea = new PlotRenderer(parent, wxID_ANY, NULL, *this);
 #endif
 
-	plotArea->SetMinSize(wxSize(650, 320));
+	plotArea->SetMinSize(wxSize(500, 200));
 	plotArea->SetGridOn();
 	plotArea->SetXLogarithmic(true);
 	plotArea->SetTitle(title);
