@@ -65,7 +65,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(FREETYPE)\include;$(WXWIN)\lib\vc_lib\mswu;$(WXWIN)\include;$(FTGL)\src;./src</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>WIN32;__WXMSW__;FTGL_LIBRARY_STATIC;_TF_PLOTTER_64_BIT_;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;__WXMSW__;FTGL_LIBRARY_STATIC;_TFPLOTTER_64_BIT_;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
