@@ -13,172 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\application">
-      <UniqueIdentifier>{66ab1432-544d-466a-baf7-38289315f2ce}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\application">
-      <UniqueIdentifier>{dae35d68-1ba2-46a4-8f98-865150fced8b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\renderer">
-      <UniqueIdentifier>{0bd24e54-d8d6-4109-8a52-d1be310da9ac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\renderer\primitives">
-      <UniqueIdentifier>{b41934a6-7118-4902-bdc7-0a93efe32a3c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\renderer">
-      <UniqueIdentifier>{f546e54e-8844-4318-a226-21732fd412cf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\renderer\primitives">
-      <UniqueIdentifier>{11e4824f-85eb-4335-9a34-3251bf69683f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\utilities">
-      <UniqueIdentifier>{8f5404b8-1c99-4e88-b64a-7389dc48f8b0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\utilities">
-      <UniqueIdentifier>{4b90bc3e-43e6-4fec-af51-4f07643dfca6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\utilities\math">
-      <UniqueIdentifier>{5dd16917-d2ba-40b0-abab-c21dbb6c0bc4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\utilities\math">
-      <UniqueIdentifier>{988d0119-e48e-4a60-bc0a-5c8641cc7c4f}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\application\mainFrame.h">
-      <Filter>Header Files\application</Filter>
-    </ClInclude>
-    <ClInclude Include="src\application\plotObject.h">
-      <Filter>Header Files\application</Filter>
-    </ClInclude>
-    <ClInclude Include="src\application\plotterApp.h">
-      <Filter>Header Files\application</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\color.h">
-      <Filter>Header Files\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\plotRenderer.h">
-      <Filter>Header Files\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\renderWindow.h">
-      <Filter>Header Files\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\primitives\axis.h">
-      <Filter>Header Files\renderer\primitives</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\primitives\plotCursor.h">
-      <Filter>Header Files\renderer\primitives</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\primitives\plotCurve.h">
-      <Filter>Header Files\renderer\primitives</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\primitives\primitive.h">
-      <Filter>Header Files\renderer\primitives</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\primitives\text.h">
-      <Filter>Header Files\renderer\primitives</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\primitives\zoomBox.h">
-      <Filter>Header Files\renderer\primitives</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utilities\dataset2D.h">
-      <Filter>Header Files\utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utilities\fontFinder.h">
-      <Filter>Header Files\utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utilities\machineDefinitions.h">
-      <Filter>Header Files\utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utilities\managedList.h">
-      <Filter>Header Files\utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utilities\math\complex.h">
-      <Filter>Header Files\utilities\math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utilities\math\expressionTree.h">
-      <Filter>Header Files\utilities\math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utilities\math\matrix.h">
-      <Filter>Header Files\utilities\math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utilities\math\plotMath.h">
-      <Filter>Header Files\utilities\math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utilities\math\vector.h">
-      <Filter>Header Files\utilities\math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\application\dataManager.h">
-      <Filter>Header Files\application</Filter>
-    </ClInclude>
-    <ClInclude Include="src\application\tfDialog.h">
-      <Filter>Header Files\application</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\application\mainFrame.cpp">
-      <Filter>Source Files\application</Filter>
-    </ClCompile>
-    <ClCompile Include="src\application\plotObject.cpp">
-      <Filter>Source Files\application</Filter>
-    </ClCompile>
-    <ClCompile Include="src\application\plotterApp.cpp">
-      <Filter>Source Files\application</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\color.cpp">
-      <Filter>Source Files\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\plotRenderer.cpp">
-      <Filter>Source Files\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\renderWindow.cpp">
-      <Filter>Source Files\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\primitives\axis.cpp">
-      <Filter>Source Files\renderer\primitives</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\primitives\plotCursor.cpp">
-      <Filter>Source Files\renderer\primitives</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\primitives\plotCurve.cpp">
-      <Filter>Source Files\renderer\primitives</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\primitives\primitive.cpp">
-      <Filter>Source Files\renderer\primitives</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\primitives\text.cpp">
-      <Filter>Source Files\renderer\primitives</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\primitives\zoomBox.cpp">
-      <Filter>Source Files\renderer\primitives</Filter>
-    </ClCompile>
-    <ClCompile Include="src\utilities\dataset2D.cpp">
-      <Filter>Source Files\utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="src\utilities\fontFinder.cpp">
-      <Filter>Source Files\utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="src\utilities\math\complex.cpp">
-      <Filter>Source Files\utilities\math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\utilities\math\expressionTree.cpp">
-      <Filter>Source Files\utilities\math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\utilities\math\matrix.cpp">
-      <Filter>Source Files\utilities\math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\utilities\math\plotMath.cpp">
-      <Filter>Source Files\utilities\math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\utilities\math\vector.cpp">
-      <Filter>Source Files\utilities\math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\application\dataManager.cpp">
-      <Filter>Source Files\application</Filter>
-    </ClCompile>
-    <ClCompile Include="src\application\tfDialog.cpp">
-      <Filter>Source Files\application</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\tfPlotter.ico">
@@ -189,5 +23,45 @@
     <ResourceCompile Include="..\res\tfPlotter.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\dataManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mainFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\plotterApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tfDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\expressionTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tfpMath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\dataManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mainFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\plotterApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tfDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\expressionTree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tfpMath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

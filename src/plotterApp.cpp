@@ -1,6 +1,6 @@
 /*===================================================================================
                                 TransferFunctionPlotter
-                              Copyright Kerry R. Loux 2012
+                              Copyright Kerry R. Loux 2020
 
      No requirement for distribution of wxWidgets libraries, source, or binaries.
                              (http://www.wxwidgets.org/)
@@ -11,14 +11,11 @@
 // Created:  9/18/2012
 // Author:  K. Loux
 // Description:  The application class.
-// History:
 
-// wxWidgets headers
-#include <wx/wx.h>
 
 // Local headers
-#include "application/plotterApp.h"
-#include "application/mainFrame.h"
+#include "plotterApp.h"
+#include "mainFrame.h"
 
 // Implement the application (have wxWidgets set up the appropriate entry points, etc.)
 IMPLEMENT_APP(TransferFunctionPlotterApp);
@@ -67,7 +64,7 @@ bool TransferFunctionPlotterApp::OnInit()
 
 	mainFrame = new MainFrame();
 
-	if (mainFrame == NULL)
+	if (!mainFrame)
 		return false;
 
 	mainFrame->Show(true);

@@ -8,6 +8,8 @@ DataPlotter/Release
 *.suo
 *.sdf
 *.opensdf
+*.opendb
+*.db
 
 # Ignore GKT directories
 bin/

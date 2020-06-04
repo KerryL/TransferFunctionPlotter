@@ -1,6 +1,6 @@
 /*===================================================================================
                                 TransferFunctionPlotter
-                              Copyright Kerry R. Loux 2012
+                              Copyright Kerry R. Loux 2020
 
      No requirement for distribution of wxWidgets libraries, source, or binaries.
                              (http://www.wxwidgets.org/)
@@ -11,14 +11,13 @@
 // Created:  3/21/2014
 // Author:  K. Loux
 // Description:  Main frame for the application.
-// History:
+
+// Local headers
+#include "tfDialog.h"
+#include "expressionTree.h"
 
 // wxWidgets headers
 #include <wx/statline.h>
-
-// Local headers
-#include "application/tfDialog.h"
-#include "utilities/math/expressionTree.h"
 
 TFDialog::TFDialog(wxWindow *parent) : wxDialog(parent, wxID_ANY, _T("Specify Transfer Function"),
 	wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE)
@@ -66,7 +65,7 @@ void TFDialog::CreateControls(const wxString &numerator, const wxString &denomin
 	numeratorCtrl->SetFocus();
 }
 
-bool TFDialog::TransferDataFromWindow(void)
+bool TFDialog::TransferDataFromWindow()
 {
 	ExpressionTree et;
 	wxString errorString = et.CheckExpression(numeratorCtrl->GetValue());

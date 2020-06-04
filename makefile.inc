@@ -8,7 +8,7 @@
 # be added automatically
 INCDIRS_TEMP = \
 	$(CURDIR) \
-	$(CURDIR)/TransferFunctionPlotter/src
+	$(CURDIR)/src
 
 INCDIRS = $(addprefix -I,$(INCDIRS_TEMP))
 

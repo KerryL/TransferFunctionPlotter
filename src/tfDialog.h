@@ -1,6 +1,6 @@
 /*===================================================================================
                                 TransferFunctionPlotter
-                              Copyright Kerry R. Loux 2012
+                              Copyright Kerry R. Loux 2020
 
      No requirement for distribution of wxWidgets libraries, source, or binaries.
                              (http://www.wxwidgets.org/)
@@ -11,7 +11,6 @@
 // Created:  3/21/2014
 // Author:  K. Loux
 // Description:  Main frame for the application.
-// History:
 
 #ifndef _TF_DIALOG_H_
 #define _TF_DIALOG_H_
@@ -25,10 +24,10 @@ class TFDialog : public wxDialog
 public:
 	TFDialog(wxWindow *parent);
 	TFDialog(wxWindow *parent, const wxString &numerator, const wxString &denominator);
-	virtual ~TFDialog() {};
+	virtual ~TFDialog() {}
 
-	wxString GetNumerator(void) const { return numeratorCtrl->GetValue(); };
-	wxString GetDenominator(void) const { return denominatorCtrl->GetValue(); };
+	wxString GetNumerator() const { return numeratorCtrl->GetValue(); }
+	wxString GetDenominator() const { return denominatorCtrl->GetValue(); }
 
 private:
 	void CreateControls(const wxString &numerator = "", const wxString &denominator = "");
@@ -37,7 +36,7 @@ private:
 	wxTextCtrl *denominatorCtrl;
 
 protected:
-	virtual bool TransferDataFromWindow(void);
+	virtual bool TransferDataFromWindow();
 };
 
 #endif// _TF_DIALOG_H_

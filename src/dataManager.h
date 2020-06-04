@@ -1,6 +1,6 @@
 /*===================================================================================
                                 TransferFunctionPlotter
-                              Copyright Kerry R. Loux 2012
+                              Copyright Kerry R. Loux 2020
 
      No requirement for distribution of wxWidgets libraries, source, or binaries.
                              (http://www.wxwidgets.org/)
@@ -13,18 +13,17 @@
 // Description:  Data container/manager.  Allows single TFs to appear in options grid,
 //				 while maintaining separate data for amplitude, phase (and total for
 //				 all TFs).
-// History:
 
-// Standard C++ headers
-#include <vector>
-#include <utility>
+// LibPlot2D headers
+#include <lp2d/utilities/dataset2D.h>
+#include <lp2d/utilities/managedList.h>
 
 // wxWidgets headers
 #include <wx/wx.h>
 
-// Local headers
-#include "utilities/managedList.h"
-#include "utilities/dataset2D.h"
+// Standard C++ headers
+#include <vector>
+#include <utility>
 
 class DataManager
 {
@@ -34,24 +33,24 @@ public:
 	bool AddTransferFunction(const wxString &numerator, const wxString &denominator);
 	bool UpdateTransferFunction(const unsigned int &i, const wxString &numerator, const wxString &denominator);
 
-	void SetFrequencyUnitsHertz(void);
-	void SetFrequencyUnitsRadPerSec(void);
+	void SetFrequencyUnitsHertz();
+	void SetFrequencyUnitsRadPerSec();
 	void SetFrequencyRange(const double &min, const double &max);
 
-	Dataset2D* GetAmplitudeData(const unsigned int &i) { return amplitudePlots[i]; };
-	Dataset2D* GetPhaseData(const unsigned int &i) { return phasePlots[i]; };
-	Dataset2D* GetTotalAmplitudeData(void);
-	Dataset2D* GetTotalPhaseData(void);
+	LibPlot2D::Dataset2D& GetAmplitudeData(const unsigned int &i) { return *amplitudePlots[i]; }
+	LibPlot2D::Dataset2D& GetPhaseData(const unsigned int &i) { return *phasePlots[i]; }
+	LibPlot2D::Dataset2D& GetTotalAmplitudeData();
+	LibPlot2D::Dataset2D& GetTotalPhaseData();
 
-	wxString GetNumerator(const unsigned int &i) const { return transferFunctions[i].first; };
-	wxString GetDenominator(const unsigned int &i) const { return transferFunctions[i].second; };
+	wxString GetNumerator(const unsigned int &i) const { return transferFunctions[i].first; }
+	wxString GetDenominator(const unsigned int &i) const { return transferFunctions[i].second; }
 
-	unsigned int GetCount(void) { return amplitudePlots.GetCount(); };
+	unsigned int GetCount() { return amplitudePlots.GetCount(); }
 
-	void RemoveAllTransferFunctions(void);
+	void RemoveAllTransferFunctions();
 	void RemoveTransferFunctions(const unsigned int &i);
 
-	void UpdateTotalTransferFunctionData(void);
+	void UpdateTotalTransferFunctionData();
 
 private:
 	double minFreq, maxFreq;// [Hz]
@@ -59,16 +58,16 @@ private:
 
 	static const unsigned int numberOfPoints;
 
-	ManagedList<Dataset2D> amplitudePlots;
-	ManagedList<Dataset2D> phasePlots;
+	LibPlot2D::ManagedList<LibPlot2D::Dataset2D> amplitudePlots;
+	LibPlot2D::ManagedList<LibPlot2D::Dataset2D> phasePlots;
 
 	bool totalNeedsUpdate;
-	Dataset2D totalAmplitude;
-	Dataset2D totalPhase;
+	LibPlot2D::Dataset2D totalAmplitude;
+	LibPlot2D::Dataset2D totalPhase;
 
 	std::vector<std::pair<wxString, wxString> > transferFunctions;
-	wxString ConstructTotalTransferFunction(void) const;
-	void UpdateAllTransferFunctionData(void);
+	wxString ConstructTotalTransferFunction() const;
+	void UpdateAllTransferFunctionData();
 
 	wxString AssembleTransferFunctionString(const wxString &numerator, const wxString &denominator) const;
 	wxString AssembleTransferFunctionString(const std::pair<wxString, wxString> &tf) const;

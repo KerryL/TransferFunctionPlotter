@@ -1,6 +1,6 @@
 /*===================================================================================
                                 TransferFunctionPlotter
-                              Copyright Kerry R. Loux 2012
+                              Copyright Kerry R. Loux 2020
 
      No requirement for distribution of wxWidgets libraries, source, or binaries.
                              (http://www.wxwidgets.org/)
@@ -11,41 +11,40 @@
 // Created:  5/6/2011
 // Author:  K. Loux
 // Description:  Handles user-specified mathematical operations on datasets.
-// History:
 
 #ifndef _EXPRESSION_TREE_H_
 #define _EXPRESSION_TREE_H_
 
+// LibPlot2D headers
+#include <lp2d/utilities/managedList.h>
+#include <lp2d/utilities/dataset2D.h>
+#include <lp2d/utilities/math/complex.h>
+
+// wxWidgets headers
+#include <wx/wx.h>
+
 // Standard C++ headers
 #include <queue>
 #include <stack>
-
-// Local headers
-#include "utilities/managedList.h"
-#include "utilities/dataset2D.h"
-#include "utilities/math/complex.h"
-
-// wxWidgets forward declarations
-class wxString;
 
 class ExpressionTree
 {
 public:
 	// Main solver method
 	wxString Solve(wxString expression, const double &minFreq, const double &maxFreq,
-		const unsigned int &resolution, Dataset2D &magnitude, Dataset2D &phase);
+		const unsigned int &resolution, LibPlot2D::Dataset2D &magnitude, LibPlot2D::Dataset2D &phase);
 
 	wxString CheckExpression(wxString expression);
 
 private:
 	std::queue<wxString> outputQueue;
-	std::vector<ComplexKRL> dataVector;
+	std::vector<LibPlot2D::Complex> dataVector;
 
 	void PrepareDataset(const double &minFreq, const double &maxFreq,
-		const unsigned int &resolution, Dataset2D &magnitude, Dataset2D &phase);
+		const unsigned int &resolution, LibPlot2D::Dataset2D &magnitude, LibPlot2D::Dataset2D &phase);
 
 	wxString ParseExpression(const wxString &expression);
-	wxString EvaluateExpression(void);
+	wxString EvaluateExpression();
 
 	void ProcessOperator(std::stack<wxString> &operatorStack, const wxString &s);
 	void ProcessCloseParenthese(std::stack<wxString> &operatorStack);
@@ -63,24 +62,24 @@ private:
 
 	void PushToStack(const double &value, std::stack<double> &doubleStack,
 		std::stack<bool> &useDoubleStack) const;
-	void PushToStack(const std::vector<ComplexKRL> &vector, std::stack<std::vector<ComplexKRL> > &vectorStack,
+	void PushToStack(const std::vector<LibPlot2D::Complex> &vector, std::stack<std::vector<LibPlot2D::Complex>> &vectorStack,
 		std::stack<bool> &useDoubleStack) const;
-	bool PopFromStack(std::stack<double> &doubleStack, std::stack<std::vector<ComplexKRL> > &vectorStack,
-		std::stack<bool> &useDoubleStack, double &value, std::vector<ComplexKRL> &vector) const;
+	bool PopFromStack(std::stack<double> &doubleStack, std::stack<std::vector<LibPlot2D::Complex>> &vectorStack,
+		std::stack<bool> &useDoubleStack, double &value, std::vector<LibPlot2D::Complex> &vector) const;
 
 	double ApplyOperation(const wxString &operation, const double &first, const double &second) const;
-	std::vector<ComplexKRL> ApplyOperation(const wxString &operation, const std::vector<ComplexKRL> &first, const double &second) const;
-	std::vector<ComplexKRL> ApplyOperation(const wxString &operation, const double &first, const std::vector<ComplexKRL> &second) const;
-	std::vector<ComplexKRL> ApplyOperation(const wxString &operation, const std::vector<ComplexKRL> &first,
-		const std::vector<ComplexKRL> &second) const;
+	std::vector<LibPlot2D::Complex> ApplyOperation(const wxString &operation, const std::vector<LibPlot2D::Complex> &first, const double &second) const;
+	std::vector<LibPlot2D::Complex> ApplyOperation(const wxString &operation, const double &first, const std::vector<LibPlot2D::Complex> &second) const;
+	std::vector<LibPlot2D::Complex> ApplyOperation(const wxString &operation, const std::vector<LibPlot2D::Complex> &first,
+		const std::vector<LibPlot2D::Complex> &second) const;
 
 	bool EvaluateNext(const wxString &next, std::stack<double> &doubleStack,
-		std::stack<std::vector<ComplexKRL> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
+		std::stack<std::vector<LibPlot2D::Complex> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
 	bool EvaluateOperator(const wxString &operation, std::stack<double> &doubleStack,
-		std::stack<std::vector<ComplexKRL> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
+		std::stack<std::vector<LibPlot2D::Complex> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
 	bool EvaluateNumber(const wxString &number, std::stack<double> &doubleStack,
 		std::stack<bool> &useDoubleStack, wxString &errorString) const;
-	bool EvaluateS(std::stack<std::vector<ComplexKRL> > &vectorStack,
+	bool EvaluateS(std::stack<std::vector<LibPlot2D::Complex> > &vectorStack,
 		std::stack<bool> &useDoubleStack) const;
 
 	bool ParenthesesBalanced(const wxString &expression) const;

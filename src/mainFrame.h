@@ -1,6 +1,6 @@
 /*===================================================================================
                                 TransferFunctionPlotter
-                              Copyright Kerry R. Loux 2012
+                              Copyright Kerry R. Loux 2020
 
      No requirement for distribution of wxWidgets libraries, source, or binaries.
                              (http://www.wxwidgets.org/)
@@ -11,21 +11,29 @@
 // Created:  9/18/2012
 // Author:  K. Loux
 // Description:  Main frame for the application.
-// History:
 
 #ifndef _MAIN_FRAME_H_
 #define _MAIN_FRAME_H_
+
+// Local headers
+#include "dataManager.h"
+
+// LibPlot2D headers
+#include <lp2d/gui/guiInterface.h>
+
+// wxWidgets headers
+#include <wx/wx.h>
 
 // Standard C++ headers
 #include <fstream>
 #include <vector>
 
-// wxWidgets headers
-#include <wx/wx.h>
-
-// Local headers
-#include "utilities/dataset2D.h"
-#include "application/dataManager.h"
+// LibPlot2D forward delcarations
+namespace LibPlot2D
+{
+class PlotRenderer;
+class Color;
+}
 
 // wxWidgets forward declarations
 class wxGrid;
@@ -33,40 +41,18 @@ class wxGridEvent;
 class wxSplitterWindow;
 class wxSplitterEvent;
 
-// Local forward declarations
-class PlotRenderer;
-class Color;
-
-// The main frame class
 class MainFrame : public wxFrame
 {
 public:
-	// Constructor
 	MainFrame();
-
-	// Destructor
 	~MainFrame();
-
-	enum PlotContext
-	{
-		plotContextXAxis,
-		plotContextLeftYAxis,
-		plotContextRightYAxis,
-		plotContextPlotArea
-	};
-
-	void CreatePlotContextMenu(const wxPoint &position, const PlotContext &context);
-	void DisplayAxisRangeDialog(const PlotContext &axis);
-
-	void UpdateCursorValues(const bool &leftVisible, const bool &rightVisible,
-		const double &leftValue, const double &rightValue);
 
 private:
 	// Functions that do some of the frame initialization and control positioning
-	void CreateControls(void);
-	void SetProperties(void);
+	void CreateControls();
+	void SetProperties();
 
-	PlotRenderer* CreatePlotArea(wxWindow *parent, const wxString &title, const wxString &yLabel);
+	LibPlot2D::PlotRenderer* CreatePlotArea(wxWindow *parent, LibPlot2D::GuiInterface& guiInterface);
 	wxSizer* CreateButtons(wxWindow *parent);
 	wxGrid* CreateOptionsGrid(wxWindow *parent);
 	wxSizer* CreateInputControls(wxWindow *parent);
@@ -79,10 +65,15 @@ private:
 	wxTextCtrl *minFrequencyTextBox;
 	wxTextCtrl *maxFrequencyTextBox;
 
-	PlotRenderer *selectedAmplitudePlot;
-	PlotRenderer *selectedPhasePlot;
-	PlotRenderer *totalAmplitudePlot;
-	PlotRenderer *totalPhasePlot;
+	LibPlot2D::PlotRenderer *selectedAmplitudePlot;
+	LibPlot2D::PlotRenderer *selectedPhasePlot;
+	LibPlot2D::PlotRenderer *totalAmplitudePlot;
+	LibPlot2D::PlotRenderer *totalPhasePlot;
+
+	LibPlot2D::GuiInterface selectedAmplitudeInterface;
+	LibPlot2D::GuiInterface selectedPhaseInterface;
+	LibPlot2D::GuiInterface totalAmplitudeInterface;
+	LibPlot2D::GuiInterface totalPhaseInterface;
 
 	enum Columns
 	{
@@ -104,23 +95,23 @@ private:
 	// from the coordinates for this object!
 	void CreateGridContextMenu(const wxPoint &position, const unsigned int &row);
 
-	void ClearAllCurves(void);
+	void ClearAllCurves();
 	void AddCurve(wxString numerator, wxString denominator);
 	void UpdateCurve(unsigned int i);
 	void UpdateCurve(unsigned int i, wxString numerator, wxString denominator);
 	void RemoveCurve(const unsigned int &i);
 
-	Color GetNextColor(const unsigned int &index) const;
-	void AddXRowToGrid(void);
+	LibPlot2D::Color GetNextColor(const unsigned int &index) const;
+	void AddXRowToGrid();
 	unsigned int AddDataRowToGrid(const wxString &name);
 
-	void UpdateCurveProperties(const unsigned int &index, const Color &color,
+	void UpdateCurveProperties(const unsigned int &index, const LibPlot2D::Color &color,
 		const bool &visible, const bool &rightAxis);
 	void UpdateCurveProperties(const unsigned int &index);
 
 	void UpdateSelectedTransferFunction(const unsigned int &i);
 
-	void SetXLabels(void);
+	void SetXLabels();
 	wxString xLabel;
 
 	DataManager dataManager;
@@ -131,27 +122,7 @@ private:
 		idAddButton = wxID_HIGHEST + 100,
 		idRemoveButton,
 		idRemoveAllButton,
-
-		idPlotContextToggleGridlines,
-		idPlotContextAutoScale,
-		idPlotContextWriteImageFile,
-
-		idPlotContextBGColor,
-		idPlotContextGridColor,
-
-		idPlotContextToggleBottomGridlines,// Maintain this order for each axis' context IDs
-		idPlotContextAutoScaleBottom,
-		idPlotContextToggleBottomMinorGridlines,
-
-		idPlotContextToggleLeftGridlines,
-		idPlotContextAutoScaleLeft,
-
-		idPlotContextToggleRightGridlines,
-		idPlotContextAutoScaleRight
 	};
-
-	wxMenu *CreateAxisContextMenu(const unsigned int &baseEventId) const;
-	wxMenu *CreatePlotAreaContextMenu(void) const;
 
 	// Event handlers-----------------------------------------------------
 	// Buttons
@@ -168,27 +139,6 @@ private:
 	void GridDoubleClickEvent(wxGridEvent &event);
 	void GridLeftClickEvent(wxGridEvent &event);
 	void GridCellChangeEvent(wxGridEvent &event);
-
-	// Context menu events
-	void ContextToggleGridlines(wxCommandEvent &event);
-	void ContextAutoScale(wxCommandEvent &event);
-	void ContextWriteImageFile(wxCommandEvent &event);
-
-	void ContextPlotBGColor(wxCommandEvent &event);
-	void ContextGridColor(wxCommandEvent &event);
-
-	void ContextToggleGridlinesBottom(wxCommandEvent &event);
-	void ContextAutoScaleBottom(wxCommandEvent &event);
-	void ContextSetRangeBottom(wxCommandEvent &event);
-	void ContextToggleMinorGridlinesBottom(wxCommandEvent &event);
-
-	void ContextToggleGridlinesLeft(wxCommandEvent &event);
-	void ContextAutoScaleLeft(wxCommandEvent &event);
-	void ContextSetRangeLeft(wxCommandEvent &event);
-
-	void ContextToggleGridlinesRight(wxCommandEvent &event);
-	void ContextAutoScaleRight(wxCommandEvent &event);
-	void ContextSetRangeRight(wxCommandEvent &event);
 	// End event handlers-------------------------------------------------
 
 	bool XScalingFactorIsKnown(double &factor, wxString *label) const;
@@ -200,13 +150,10 @@ private:
 	void UpdateSingleCursorValue(const unsigned int &row, double value,
 		const unsigned int &column, const bool &isVisible);
 
-	bool GetCurrentAxisRange(const PlotContext &axis, double &min, double &max) const;
-	void SetNewAxisRange(const PlotContext &axis, const double &min, const double &max);
-
 	wxArrayString GetFileNameFromUser(wxString dialogTitle, wxString defaultDirectory,
 		wxString defaultFileName, wxString wildcard, long style);
 
-	void UpdatePlots(void);
+	void UpdatePlots();
 
 	DECLARE_EVENT_TABLE();
 };

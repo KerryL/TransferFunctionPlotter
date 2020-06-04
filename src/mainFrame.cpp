@@ -1,6 +1,6 @@
 /*===================================================================================
                                 TransferFunctionPlotter
-                              Copyright Kerry R. Loux 2012
+                              Copyright Kerry R. Loux 2020
 
      No requirement for distribution of wxWidgets libraries, source, or binaries.
                              (http://www.wxwidgets.org/)
@@ -12,24 +12,23 @@
 // Author:  K. Loux
 // Description:  Contains the class functionality (event handlers, etc.) for the
 //				 MainFrame class.  Uses wxWidgets for the GUI components.
-// History:
 
-// Standard C++ headers
-#include <algorithm>
+// Local headers
+#include "mainFrame.h"
+#include "plotterApp.h"
+#include "tfDialog.h"
+
+// LibPlot2D headers
+#include <lp2d/renderer/plotRenderer.h>
+#include <lp2d/renderer/color.h>
 
 // wxWidgets headers
 #include <wx/grid.h>
 #include <wx/colordlg.h>
 #include <wx/splitter.h>
 
-// Local headers
-#include "application/mainFrame.h"
-#include "application/plotterApp.h"
-#include "application/tfDialog.h"
-#include "renderer/plotRenderer.h"
-#include "renderer/color.h"
-#include "utilities/dataset2D.h"
-#include "utilities/math/plotMath.h"
+// Standard C++ headers
+#include <algorithm>
 
 // *nix Icons
 #ifdef __WXGTK__
@@ -59,8 +58,9 @@
 //		None
 //
 //==========================================================================
-MainFrame::MainFrame() : wxFrame(NULL, wxID_ANY, wxEmptyString, wxDefaultPosition,
-								 wxDefaultSize, wxDEFAULT_FRAME_STYLE)
+MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosition,
+	wxDefaultSize, wxDEFAULT_FRAME_STYLE), selectedAmplitudeInterface(this),
+	selectedPhaseInterface(this), totalAmplitudeInterface(this), totalPhaseInterface(this)
 {
 	CreateControls();
 	SetProperties();
@@ -103,7 +103,7 @@ MainFrame::~MainFrame()
 //		None
 //
 //==========================================================================
-void MainFrame::CreateControls(void)
+void MainFrame::CreateControls()
 {
 	wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 	wxSplitterWindow *mainSplitter = new wxSplitterWindow(this);
@@ -116,10 +116,10 @@ void MainFrame::CreateControls(void)
 	lowerPanel->SetSizer(lowerSizer);
 
 	wxWindow *upperPanel = new wxPanel(mainSplitter);
-	selectedAmplitudePlot = CreatePlotArea(upperPanel, _T("Amplitude"), _T("Amplitude [dB]"));
-	selectedPhasePlot = CreatePlotArea(upperPanel, _T("Phase"), _T("Phase [deg]"));
-	totalAmplitudePlot = CreatePlotArea(upperPanel, _T("Amplitude (Total)"), _T("Amplitude [dB]"));
-	totalPhasePlot = CreatePlotArea(upperPanel, _T("Phase (Total)"), _T("Phase [deg]"));
+	selectedAmplitudePlot = CreatePlotArea(upperPanel, selectedAmplitudeInterface/*, _T("Amplitude"), _T("Amplitude [dB]")*/);
+	selectedPhasePlot = CreatePlotArea(upperPanel, selectedPhaseInterface/*, _T("Phase"), _T("Phase [deg]")*/);
+	totalAmplitudePlot = CreatePlotArea(upperPanel, totalAmplitudeInterface/*, _T("Amplitude (Total)"), _T("Amplitude [dB]")*/);
+	totalPhasePlot = CreatePlotArea(upperPanel, totalPhaseInterface/*, _T("Phase (Total)"), _T("Phase [deg]")*/);
 
 	wxGridSizer *upperSizer = new wxGridSizer(2,0,0);
 	upperSizer->Add(selectedAmplitudePlot, 1, wxGROW);
@@ -146,34 +146,29 @@ void MainFrame::CreateControls(void)
 // Description:		Creates the main plot control.
 //
 // Input Arguments:
-//		parent	= wxWindow*
-//		title	= const wxString&
-//		yLabel	= const wxString&
+//		parent			= wxWindow*
+//		guiInterface	= LibPlot2D::GuiInterface
+//		title			= const wxString&
+//		yLabel			= const wxString&
 //
 // Output Arguments:
 //		None
 //
 // Return Value:
-//		PlotRenderer* pointing to plotArea
+//		LibPlot2D::PlotRenderer* pointing to plotArea
 //
 //==========================================================================
-PlotRenderer* MainFrame::CreatePlotArea(wxWindow *parent, const wxString &title, const wxString &yLabel)
+LibPlot2D::PlotRenderer* MainFrame::CreatePlotArea(wxWindow *parent, LibPlot2D::GuiInterface& guiInterface)
 {
-#ifdef __WXGTK__
-	// Under GTK, we get a segmentation fault or X error on call to SwapBuffers in RenderWindow.
-	// Adding the double-buffer arugment fixes this.  Under windows, the double-buffer argument
-	// causes the colors to go funky.  So we have this #if.
-	int args[] = {WX_GL_DOUBLEBUFFER, 0};
-	PlotRenderer *plotArea = new PlotRenderer(parent, wxID_ANY, args, *this);
-#else
-	PlotRenderer *plotArea = new PlotRenderer(parent, wxID_ANY, NULL, *this);
-#endif
+	wxGLAttributes displayAttributes;
+	displayAttributes.PlatformDefaults().RGBA().DoubleBuffer().SampleBuffers(1).Samplers(4).Stencil(1).EndList();
+	assert(wxGLCanvas::IsDisplaySupported(displayAttributes));
+	LibPlot2D::PlotRenderer *plotArea = new LibPlot2D::PlotRenderer(guiInterface, *parent, wxID_ANY, displayAttributes);
 
 	plotArea->SetMinSize(wxSize(500, 200));
-	plotArea->SetGridOn();
+	plotArea->SetMajorGridOn();
 	plotArea->SetXLogarithmic(true);
-	plotArea->SetTitle(title);
-	plotArea->SetLeftYLabel(yLabel);
+	plotArea->SetCurveQuality(LibPlot2D::PlotRenderer::CurveQuality::HighWrite);
 
 	return plotArea;
 }
@@ -335,7 +330,7 @@ wxGrid* MainFrame::CreateOptionsGrid(wxWindow *parent)
 //		None
 //
 //==========================================================================
-void MainFrame::SetProperties(void)
+void MainFrame::SetProperties()
 {
 	SetTitle(TransferFunctionPlotterApp::transferFunctionPlotterTitle);
 	SetName(TransferFunctionPlotterApp::transferFunctionPlotterName);
@@ -382,54 +377,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_GRID_CELL_RIGHT_CLICK(MainFrame::GridRightClickEvent)
 	EVT_GRID_CELL_LEFT_DCLICK(MainFrame::GridDoubleClickEvent)
 	EVT_GRID_CELL_LEFT_CLICK(MainFrame::GridLeftClickEvent)
-	EVT_GRID_CELL_CHANGE(MainFrame::GridCellChangeEvent)
-
-	// Context menu
-	EVT_MENU(idPlotContextToggleGridlines,			MainFrame::ContextToggleGridlines)
-	EVT_MENU(idPlotContextAutoScale,				MainFrame::ContextAutoScale)
-	EVT_MENU(idPlotContextWriteImageFile,			MainFrame::ContextWriteImageFile)
-
-	EVT_MENU(idPlotContextBGColor,					MainFrame::ContextPlotBGColor)
-	EVT_MENU(idPlotContextGridColor,				MainFrame::ContextGridColor)
-
-	EVT_MENU(idPlotContextToggleBottomGridlines,	MainFrame::ContextToggleGridlinesBottom)
-	EVT_MENU(idPlotContextAutoScaleBottom,			MainFrame::ContextAutoScaleBottom)
-	EVT_MENU(idPlotContextToggleBottomMinorGridlines,	MainFrame::ContextToggleMinorGridlinesBottom)
-
-	EVT_MENU(idPlotContextToggleLeftGridlines,		MainFrame::ContextToggleGridlinesLeft)
-	EVT_MENU(idPlotContextAutoScaleLeft,			MainFrame::ContextAutoScaleLeft)
-
-	EVT_MENU(idPlotContextToggleRightGridlines,		MainFrame::ContextToggleGridlinesRight)
-	EVT_MENU(idPlotContextAutoScaleRight,			MainFrame::ContextAutoScaleRight)
+	EVT_GRID_CELL_CHANGED(MainFrame::GridCellChangeEvent)
 END_EVENT_TABLE();
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextWriteImageFile
-//
-// Description:		Calls the object of interest's write image file method.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextWriteImageFile(wxCommandEvent& WXUNUSED(event))
-{
-	wxArrayString pathAndFileName = GetFileNameFromUser(_T("Save Image File"), wxEmptyString, wxEmptyString,
-		_T("Bitmap Image (*.bmp)|*.bmp|JPEG Image (*.jpg, *.jpeg)|*.jpg;*.jpeg|PNG Image (*.png)|*.png|TIFF Image (*.tif)|*.tif"),
-		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-
-	if (pathAndFileName.IsEmpty())
-		return;
-
-	//plotArea->WriteImageToFile(pathAndFileName[0]);// FIXME:  Re-implement
-}
 
 //==========================================================================
 // Class:			MainFrame
@@ -580,110 +529,6 @@ void MainFrame::CreateGridContextMenu(const wxPoint &position, const unsigned in
 
 //==========================================================================
 // Class:			MainFrame
-// Function:		CreatePlotContextMenu
-//
-// Description:		Displays a context menu for the plot.
-//
-// Input Arguments:
-//		position	= const wxPoint& specifying the position to display the menu
-//		context		= const PlotContext& describing the area of the plot
-//					  on which the click occured
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::CreatePlotContextMenu(const wxPoint &position, const PlotContext &context)
-{
-	wxMenu *contextMenu;
-
-	switch (context)
-	{
-	case plotContextXAxis:
-		contextMenu = CreateAxisContextMenu(idPlotContextToggleBottomGridlines);
-		contextMenu->Insert(1, idPlotContextToggleBottomMinorGridlines, _T("Toggle Minor Gridlines"));
-		break;
-
-	case plotContextLeftYAxis:
-		contextMenu = CreateAxisContextMenu(idPlotContextToggleLeftGridlines);
-		break;
-
-	case plotContextRightYAxis:
-		contextMenu = CreateAxisContextMenu(idPlotContextToggleRightGridlines);
-		break;
-
-	default:
-	case plotContextPlotArea:
-		contextMenu = CreatePlotAreaContextMenu();
-		break;
-	}
-
-	PopupMenu(contextMenu, position);
-
-	delete contextMenu;
-	contextMenu = NULL;
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		CreatePlotAreaContextMenu
-//
-// Description:		Displays a context menu for the specified plot axis.
-//
-// Input Arguments:
-//		None
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		wxMenu*
-//
-//==========================================================================
-wxMenu* MainFrame::CreatePlotAreaContextMenu(void) const
-{
-	wxMenu *contextMenu = new wxMenu();
-	contextMenu->Append(idPlotContextToggleGridlines, _T("Toggle Gridlines"));
-	contextMenu->Append(idPlotContextAutoScale, _T("Auto Scale"));
-	contextMenu->Append(idPlotContextWriteImageFile, _T("Write Image File"));
-	contextMenu->AppendSeparator();
-	contextMenu->Append(idPlotContextBGColor, _T("Set Background Color"));
-	contextMenu->Append(idPlotContextGridColor, _T("Set Gridline Color"));
-
-	return contextMenu;
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		CreateAxisContextMenu
-//
-// Description:		Displays a context menu for the specified plot axis.
-//
-// Input Arguments:
-//		baseEventId	= const unsigned int&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		wxMenu*
-//
-//==========================================================================
-wxMenu* MainFrame::CreateAxisContextMenu(const unsigned int &baseEventId) const
-{
-	wxMenu* contextMenu = new wxMenu();
-
-	contextMenu->Append(baseEventId, _T("Toggle Axis Gridlines"));
-	contextMenu->Append(baseEventId + 1, _T("Auto Scale Axis"));
-
-	return contextMenu;
-}
-
-//==========================================================================
-// Class:			MainFrame
 // Function:		ClearAllCurves
 //
 // Description:		Removes all curves from the plot.
@@ -698,11 +543,12 @@ wxMenu* MainFrame::CreateAxisContextMenu(const unsigned int &baseEventId) const
 //		None
 //
 //==========================================================================
-void MainFrame::ClearAllCurves(void)
+void MainFrame::ClearAllCurves()
 {
-	unsigned int i;
-	for (i = dataManager.GetCount(); i > 0; i--)
-		RemoveCurve(i - 1);
+	selectedAmplitudeInterface.ClearAllCurves();
+	selectedPhaseInterface.ClearAllCurves();
+	totalAmplitudeInterface.ClearAllCurves();
+	totalPhaseInterface.ClearAllCurves();
 
 	UpdatePlots();
 }
@@ -735,14 +581,14 @@ void MainFrame::AddCurve(wxString numerator, wxString denominator)
 	unsigned int index = AddDataRowToGrid("(" + numerator + ")/(" + denominator + ")");
 	optionsGrid->EndBatch();
 
-	if (totalAmplitudePlot->GetCurveCount() == 0)
-	{
-		totalAmplitudePlot->AddCurve(*dataManager.GetTotalAmplitudeData());
-		totalPhasePlot->AddCurve(*dataManager.GetTotalPhaseData());
-	}
+	totalAmplitudeInterface.ClearAllCurves();
+	totalPhaseInterface.ClearAllCurves();
 
-	selectedAmplitudePlot->AddCurve(*dataManager.GetAmplitudeData(index - 1));
-	selectedPhasePlot->AddCurve(*dataManager.GetPhaseData(index - 1));
+	totalAmplitudeInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetTotalAmplitudeData()), _T("Total Amplitude"));
+	totalPhaseInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetTotalPhaseData()), _T("Total Phase"));
+
+	selectedAmplitudeInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetAmplitudeData(index - 1)), _T(""));
+	selectedPhaseInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetPhaseData(index - 1)), _T(""));
 	UpdateCurveProperties(index - 1, GetNextColor(index), true, false);
 	UpdatePlots();
 }
@@ -770,7 +616,7 @@ void MainFrame::UpdateCurve(unsigned int i, wxString numerator, wxString denomin
 	if (!dataManager.UpdateTransferFunction(i, numerator, denominator))
 		return;
 
-	optionsGrid->SetCellValue("(" + numerator + ")/(" + denominator + ")", i + 1, 0);
+	optionsGrid->SetCellValue(i + 1, 0, "(" + numerator + ")/(" + denominator + ")");
 	UpdatePlots();
 }
 
@@ -790,7 +636,7 @@ void MainFrame::UpdateCurve(unsigned int i, wxString numerator, wxString denomin
 //		None
 //
 //==========================================================================
-void MainFrame::AddXRowToGrid(void)
+void MainFrame::AddXRowToGrid()
 {
 	optionsGrid->AppendRows();
 
@@ -834,16 +680,16 @@ unsigned int MainFrame::AddDataRowToGrid(const wxString &name)
 	optionsGrid->SetReadOnly(index, colLineSize, false);
 	optionsGrid->SetCellValue(index, colName, name);
 
-	Color color = GetNextColor(index);
+	LibPlot2D::Color color = GetNextColor(index);
 
 	optionsGrid->SetCellBackgroundColour(index, colColor, color.ToWxColor());
 	optionsGrid->SetCellValue(index, colLineSize, _T("1"));
 	optionsGrid->SetCellValue(index, colVisible, _T("1"));
 
-	int width = optionsGrid->GetColumnWidth(colName);
+/*	int width = optionsGrid->GetColumnWidth(colName);
 	optionsGrid->AutoSizeColumn(colName);
 	if (optionsGrid->GetColumnWidth(colName) < width)
-		optionsGrid->SetColumnWidth(colName, width);
+		optionsGrid->SetColumnWidth(colName, width);*/
 
 	return index;
 }
@@ -865,29 +711,29 @@ unsigned int MainFrame::AddDataRowToGrid(const wxString &name)
 //		Color to sue
 //
 //==========================================================================
-Color MainFrame::GetNextColor(const unsigned int &index) const
+LibPlot2D::Color MainFrame::GetNextColor(const unsigned int &index) const
 {
 	unsigned int colorIndex = (index - 1) % 10;
 	if (colorIndex == 0)
-		return Color::ColorBlue;
+		return LibPlot2D::Color::ColorBlue;
 	else if (colorIndex == 1)
-		return Color::ColorRed;
+		return LibPlot2D::Color::ColorRed;
 	else if (colorIndex == 2)
-		return Color::ColorGreen;
+		return LibPlot2D::Color::ColorGreen;
 	else if (colorIndex == 3)
-		return Color::ColorMagenta;
+		return LibPlot2D::Color::ColorMagenta;
 	else if (colorIndex == 4)
-		return Color::ColorCyan;
+		return LibPlot2D::Color::ColorCyan;
 	else if (colorIndex == 5)
-		return Color::ColorOrange;
+		return LibPlot2D::Color::ColorOrange;
 	else if (colorIndex == 6)
-		return Color::ColorGray;
+		return LibPlot2D::Color::ColorGray;
 	else if (colorIndex == 7)
-		return Color::ColorPurple;
+		return LibPlot2D::Color::ColorPurple;
 	else if (colorIndex == 8)
-		return Color::ColorLightBlue;
+		return LibPlot2D::Color::ColorLightBlue;
 	else if (colorIndex == 9)
-		return Color::ColorBlack;
+		return LibPlot2D::Color::ColorBlack;
 	else
 		assert(false);
 
@@ -897,7 +743,7 @@ Color MainFrame::GetNextColor(const unsigned int &index) const
 	// Color::ColorPaleGreen
 	// Color::ColorPink
 
-	return Color::ColorBlack;
+	return LibPlot2D::Color::ColorBlack;
 }
 
 //==========================================================================
@@ -928,15 +774,18 @@ void MainFrame::RemoveCurve(const unsigned int &i)
 	dataManager.RemoveTransferFunctions(i);
 	if (dataManager.GetCount() == 0)
 	{
-		selectedAmplitudePlot->RemoveAllCurves();
-		selectedPhasePlot->RemoveAllCurves();
-		totalAmplitudePlot->RemoveAllCurves();
-		totalPhasePlot->RemoveAllCurves();
+		ClearAllCurves();
 	}
 	else
 	{
-		selectedAmplitudePlot->RemoveCurve(i);
-		selectedPhasePlot->RemoveCurve(i);
+		selectedAmplitudeInterface.RemoveCurve(i);
+		selectedPhaseInterface.RemoveCurve(i);
+
+		totalAmplitudeInterface.ClearAllCurves();
+		totalPhaseInterface.ClearAllCurves();
+
+		totalAmplitudeInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetTotalAmplitudeData()), _T("Total Amplitude"));
+		totalPhaseInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetTotalPhaseData()), _T("Total Phase"));
 	}
 }
 
@@ -1092,7 +941,7 @@ void MainFrame::GridLeftClickEvent(wxGridEvent &event)
 //==========================================================================
 void MainFrame::UpdateCurveProperties(const unsigned int &index)
 {
-	Color color;
+	LibPlot2D::Color color;
 	color.Set(optionsGrid->GetCellBackgroundColour(index + 1, colColor));
 	UpdateCurveProperties(index, color,
 		!optionsGrid->GetCellValue(index + 1, colVisible).IsEmpty(),
@@ -1107,7 +956,7 @@ void MainFrame::UpdateCurveProperties(const unsigned int &index)
 //
 // Input Arguments:
 //		index		= const unsigned int&
-//		color		= const Color&
+//		color		= const LibPlot2D::Color&
 //		visible		= const bool&
 //		rightAxis	= const bool&
 //
@@ -1118,7 +967,7 @@ void MainFrame::UpdateCurveProperties(const unsigned int &index)
 //		None
 //
 //==========================================================================
-void MainFrame::UpdateCurveProperties(const unsigned int &index, const Color &color,
+void MainFrame::UpdateCurveProperties(const unsigned int &index, const LibPlot2D::Color &color,
 	const bool &visible, const bool &rightAxis)
 {
 	unsigned long lineSize;
@@ -1126,8 +975,8 @@ void MainFrame::UpdateCurveProperties(const unsigned int &index, const Color &co
 	selectedAmplitudePlot->SetCurveProperties(index, color, visible, rightAxis, lineSize, -1);
 	selectedPhasePlot->SetCurveProperties(index, color, visible, rightAxis, lineSize, -1);
 
-	totalAmplitudePlot->SetCurveProperties(0, Color::ColorBlue, true, false, 1, 0);
-	totalPhasePlot->SetCurveProperties(0, Color::ColorBlue, true, false, 1, 0);
+	totalAmplitudePlot->SetCurveProperties(0, LibPlot2D::Color::ColorBlue, true, false, 1, 0);
+	totalPhasePlot->SetCurveProperties(0, LibPlot2D::Color::ColorBlue, true, false, 1, 0);
 }
 
 //==========================================================================
@@ -1156,116 +1005,6 @@ void MainFrame::GridCellChangeEvent(wxGridEvent &event)
 	}
 
 	UpdateCurveProperties(row - 1);
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextToggleGridlines
-//
-// Description:		Toggles gridlines for the entire plot on and off.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextToggleGridlines(wxCommandEvent& WXUNUSED(event))
-{
-	if (selectedAmplitudePlot->GetGridOn())
-	{
-		selectedAmplitudePlot->SetGridOff();
-		selectedPhasePlot->SetGridOff();
-		totalAmplitudePlot->SetGridOff();
-		totalPhasePlot->SetGridOff();
-	}
-	else
-	{
-		selectedAmplitudePlot->SetGridOn();
-		selectedPhasePlot->SetGridOn();
-		totalAmplitudePlot->SetGridOn();
-		totalPhasePlot->SetGridOn();
-	}
-
-	UpdatePlots();
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextAutoScale
-//
-// Description:		Autoscales the plot.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextAutoScale(wxCommandEvent& WXUNUSED(event))
-{
-	selectedAmplitudePlot->AutoScale();
-	selectedPhasePlot->AutoScale();
-	totalAmplitudePlot->AutoScale();
-	totalPhasePlot->AutoScale();
-
-	UpdatePlots();
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		UpdateCursorValues
-//
-// Description:		Updates the values for the cursors and their differences
-//					in the options grid.
-//
-// Input Arguments:
-//		leftVisible		= const bool& indicating whether or not the left
-//						  cursor is visible
-//		rightVisible	= const bool& indicating whether or not the right
-//						  cursor is visible
-//		leftValue		= const double& giving the value of the left cursor
-//		rightValue		= const double& giving the value of the right cursor
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::UpdateCursorValues(const bool &leftVisible, const bool &rightVisible,
-		const double &leftValue, const double &rightValue)
-{
-	if (optionsGrid == NULL)
-		return;
-
-	// TODO:  This would be nicer with smart precision so we show enough digits but not too many
-
-	// For each curve, update the cursor values
-	/*int i;
-	for (i = 1; i < optionsGrid->GetRows(); i++)
-	{
-		UpdateSingleCursorValue(i, leftValue, colLeftCursor, leftVisible);
-		UpdateSingleCursorValue(i, rightValue, colRightCursor, rightVisible);
-
-		if (leftVisible && rightVisible)
-		{
-			double left(leftValue), right(rightValue);
-			plotList[i - 1]->GetYAt(left);
-			plotList[i - 1]->GetYAt(right);
-			optionsGrid->SetCellValue(i, colDifference, wxString::Format("%f", right - left));
-			optionsGrid->SetCellValue(0, colDifference, wxString::Format("%f", rightValue - leftValue));
-		}
-	}*/
 }
 
 //==========================================================================
@@ -1311,395 +1050,6 @@ void MainFrame::UpdateSingleCursorValue(const unsigned int &row,
 
 //==========================================================================
 // Class:			MainFrame
-// Function:		DisplayAxisRangeDialog
-//
-// Description:		Displays an input dialog that allows the user to set the
-//					range for an axis.
-//
-// Input Arguments:
-//		axis	= const PlotContext& specifying the axis which is to be resized
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::DisplayAxisRangeDialog(const PlotContext &axis)
-{
-	/*double min, max;
-	if (!GetCurrentAxisRange(axis, min, max))
-		return;
-
-	RangeLimitsDialog dialog(this, min, max);
-	if (dialog.ShowModal() != wxID_OK)
-		return;
-
-	// Get the new limits (and correct if they entered the larger value in the min box)
-	if (dialog.GetMinimum() < dialog.GetMaximum())
-	{
-		min = dialog.GetMinimum();
-		max = dialog.GetMaximum();
-	}
-	else
-	{
-		max = dialog.GetMinimum();
-		min = dialog.GetMaximum();
-	}
-
-	// Make sure the limits aren't equal
-	if (min == max)
-	{
-		wxMessageBox(_T("ERROR:  Limits must unique!"), _T("Error Setting Limits"), wxICON_ERROR, this);
-		return;
-	}
-
-	SetNewAxisRange(axis, min, max);
-	plotArea->SaveCurrentZoom();*/
-	// TODO:  Needs some work to affect all/one plot?
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		GetCurrentAxisRange
-//
-// Description:		Returns the range for the specified axis.
-//
-// Input Arguments:
-//		axis	= const PlotContext&
-//
-// Output Arguments:
-//		min		= double&
-//		max		= double&
-//
-// Return Value:
-//		bool, true on success, false otherwise
-//
-//==========================================================================
-bool MainFrame::GetCurrentAxisRange(const PlotContext &axis, double &min, double &max) const
-{
-	switch (axis)
-	{
-	case plotContextXAxis:
-		min = selectedAmplitudePlot->GetXMin();
-		max = selectedAmplitudePlot->GetXMax();
-		break;
-
-	case plotContextLeftYAxis:
-		min = selectedAmplitudePlot->GetLeftYMin();
-		max = selectedAmplitudePlot->GetLeftYMax();
-		break;
-
-	case plotContextRightYAxis:
-		min = selectedAmplitudePlot->GetRightYMin();
-		max = selectedAmplitudePlot->GetRightYMax();
-		break;
-
-	default:
-	case plotContextPlotArea:
-		// Plot area is not a valid context in which we can set axis limits
-		return false;
-	}
-
-	return true;
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		SetNewAxisRange
-//
-// Description:		Returns the range for the specified axis.
-//
-// Input Arguments:
-//		axis	= const PlotContext&
-//		min		= const double&
-//		max		= const double&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::SetNewAxisRange(const PlotContext &axis, const double &min, const double &max)
-{
-	switch (axis)
-	{
-	case plotContextLeftYAxis:
-		selectedAmplitudePlot->SetLeftYLimits(min, max);
-		selectedPhasePlot->SetLeftYLimits(min, max);
-		totalAmplitudePlot->SetLeftYLimits(min, max);
-		totalPhasePlot->SetLeftYLimits(min, max);
-		break;
-
-	case plotContextRightYAxis:
-		selectedAmplitudePlot->SetRightYLimits(min, max);
-		selectedPhasePlot->SetRightYLimits(min, max);
-		totalAmplitudePlot->SetRightYLimits(min, max);
-		totalPhasePlot->SetRightYLimits(min, max);
-		break;
-
-	default:
-	case plotContextXAxis:
-		selectedAmplitudePlot->SetXLimits(min, max);
-		selectedPhasePlot->SetXLimits(min, max);
-		totalAmplitudePlot->SetXLimits(min, max);
-		totalPhasePlot->SetXLimits(min, max);
-	}
-
-	UpdatePlots();
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextToggleGridlinesBottom
-//
-// Description:		Toggles gridlines for the bottom axis.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextToggleGridlinesBottom(wxCommandEvent& WXUNUSED(event))
-{
-	selectedAmplitudePlot->SetBottomGrid(!selectedAmplitudePlot->GetBottomGrid());
-	selectedPhasePlot->SetBottomGrid(!selectedPhasePlot->GetBottomGrid());
-	totalAmplitudePlot->SetBottomGrid(!totalAmplitudePlot->GetBottomGrid());
-	totalPhasePlot->SetBottomGrid(!totalPhasePlot->GetBottomGrid());
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextToggleMinorGridlinesBottom
-//
-// Description:		Toggles gridlines for the bottom axis.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextToggleMinorGridlinesBottom(wxCommandEvent& WXUNUSED(event))
-{
-	selectedAmplitudePlot->SetBottomMinorGrid(!selectedAmplitudePlot->GetBottomMinorGrid());
-	selectedPhasePlot->SetBottomMinorGrid(!selectedPhasePlot->GetBottomMinorGrid());
-	totalAmplitudePlot->SetBottomMinorGrid(!totalAmplitudePlot->GetBottomMinorGrid());
-	totalPhasePlot->SetBottomMinorGrid(!totalPhasePlot->GetBottomMinorGrid());
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextAutoScaleBottom
-//
-// Description:		Auto-scales the bottom axis.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextAutoScaleBottom(wxCommandEvent& WXUNUSED(event))
-{
-	selectedAmplitudePlot->AutoScaleBottom();
-	selectedPhasePlot->AutoScaleBottom();
-	totalAmplitudePlot->AutoScaleBottom();
-	totalPhasePlot->AutoScaleBottom();
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextToggleGridlinesLeft
-//
-// Description:		Toggles gridlines for the bottom axis.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextToggleGridlinesLeft(wxCommandEvent& WXUNUSED(event))
-{
-	selectedAmplitudePlot->SetLeftGrid(!selectedAmplitudePlot->GetLeftGrid());
-	selectedPhasePlot->SetLeftGrid(!selectedPhasePlot->GetLeftGrid());
-	totalAmplitudePlot->SetLeftGrid(!totalAmplitudePlot->GetLeftGrid());
-	totalPhasePlot->SetLeftGrid(!totalPhasePlot->GetLeftGrid());
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextAutoScaleLeft
-//
-// Description:		Toggles gridlines for the bottom axis.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextAutoScaleLeft(wxCommandEvent& WXUNUSED(event))
-{
-	selectedAmplitudePlot->AutoScaleLeft();
-	selectedPhasePlot->AutoScaleLeft();
-	totalAmplitudePlot->AutoScaleLeft();
-	totalPhasePlot->AutoScaleLeft();
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextToggleGridlinesRight
-//
-// Description:		Toggles gridlines for the bottom axis.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextToggleGridlinesRight(wxCommandEvent& WXUNUSED(event))
-{
-	selectedAmplitudePlot->SetRightGrid(!selectedAmplitudePlot->GetRightGrid());
-	selectedPhasePlot->SetRightGrid(!selectedPhasePlot->GetRightGrid());
-	totalAmplitudePlot->SetRightGrid(!totalAmplitudePlot->GetRightGrid());
-	totalPhasePlot->SetRightGrid(!totalPhasePlot->GetRightGrid());
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextAutoScaleRight
-//
-// Description:		Toggles gridlines for the bottom axis.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextAutoScaleRight(wxCommandEvent& WXUNUSED(event))
-{
-	selectedAmplitudePlot->AutoScaleRight();
-	selectedPhasePlot->AutoScaleRight();
-	totalAmplitudePlot->AutoScaleRight();
-	totalPhasePlot->AutoScaleRight();
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextPlotBGColor
-//
-// Description:		Displays a dialog allowing the user to specify the plot's
-//					background color.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextPlotBGColor(wxCommandEvent& WXUNUSED(event))
-{
-	wxColourData colorData;
-	colorData.SetColour(selectedAmplitudePlot->GetBackgroundColor().ToWxColor());
-
-	wxColourDialog dialog(this, &colorData);
-	dialog.CenterOnParent();
-	dialog.SetTitle(_T("Choose Background Color"));
-	if (dialog.ShowModal() == wxID_OK)
-    {
-		Color color;
-		color.Set(dialog.GetColourData().GetColour());
-
-		selectedAmplitudePlot->SetBackgroundColor(color);
-		selectedPhasePlot->SetBackgroundColor(color);
-		totalAmplitudePlot->SetBackgroundColor(color);
-		totalPhasePlot->SetBackgroundColor(color);
-
-		UpdatePlots();
-	}
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		ContextGridColor
-//
-// Description:		Dispalys a dialog box allowing the user to specify the
-//					gridline color.
-//
-// Input Arguments:
-//		event	= wxCommandEvent&
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-void MainFrame::ContextGridColor(wxCommandEvent& WXUNUSED(event))
-{
-	wxColourData colorData;
-	colorData.SetColour(selectedAmplitudePlot->GetGridColor().ToWxColor());
-
-	wxColourDialog dialog(this, &colorData);
-	dialog.CenterOnParent();
-	dialog.SetTitle(_T("Choose Background Color"));
-	if (dialog.ShowModal() == wxID_OK)
-    {
-		Color color;
-		color.Set(dialog.GetColourData().GetColour());
-
-		selectedAmplitudePlot->SetGridColor(color);
-		selectedPhasePlot->SetGridColor(color);
-		totalAmplitudePlot->SetGridColor(color);
-		totalPhasePlot->SetGridColor(color);
-
-		UpdatePlots();
-	}
-}
-
-//==========================================================================
-// Class:			MainFrame
 // Function:		SetXLabels
 //
 // Description:		Sets the x-label for all four plots depending on selected
@@ -1715,17 +1065,17 @@ void MainFrame::ContextGridColor(wxCommandEvent& WXUNUSED(event))
 //		None
 //
 //==========================================================================
-void MainFrame::SetXLabels(void)
+void MainFrame::SetXLabels()
 {
 	if (frequencyUnitsHertzRadioButton->GetValue())
 		xLabel = _T("Frequency [Hz]");
 	else
 		xLabel = _T("Frequency [rad/sec]");
 
-	selectedAmplitudePlot->SetXLabel(xLabel);
-	selectedPhasePlot->SetXLabel(xLabel);
-	totalAmplitudePlot->SetXLabel(xLabel);
-	totalPhasePlot->SetXLabel(xLabel);
+	selectedAmplitudeInterface.SetXDataLabel(xLabel);
+	selectedPhaseInterface.SetXDataLabel(xLabel);
+	totalAmplitudeInterface.SetXDataLabel(xLabel);
+	totalPhaseInterface.SetXDataLabel(xLabel);
 }
 
 //==========================================================================
@@ -1797,7 +1147,7 @@ void MainFrame::RadioButtonChangeEvent(wxCommandEvent& WXUNUSED(event))
 //		None
 //
 //==========================================================================
-void MainFrame::UpdatePlots(void)
+void MainFrame::UpdatePlots()
 {
 	dataManager.UpdateTotalTransferFunctionData();
 	selectedAmplitudePlot->UpdateDisplay();

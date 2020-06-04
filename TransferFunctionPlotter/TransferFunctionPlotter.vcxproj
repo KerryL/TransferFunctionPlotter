@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,12 +19,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -43,14 +45,14 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(FREETYPE)\include;$(WXWIN)\lib\vc_dll\mswud;$(WXWIN)\include;$(FTGL)\src;./src</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;__WXMSW__;__WXDEBUG__;WXUSINGDLL;FTGL_LIBRARY_STATIC;_TFPLOTTER_64_BIT_;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(LIBPLOT2D)/include;$(EIGEN);$(FREETYPE)\include\freetype2;$(WXWIN)\lib\vc_dll\mswud;$(WXWIN)\include;$(GLEW)\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;__WXMSW__;__WXDEBUG__;WXUSINGDLL;GLEW_STATIC;_DATAPLOTTER_64_BIT_;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(WXWIN)\lib\vc_dll;$(FTGL)\msvc\Build;$(FREETYPE)\objs\win32\vc2010;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>wxbase30ud.lib;wxmsw30ud_adv.lib;wxbase30ud_xml.lib;wxmsw30ud_core.lib;wxmsw30ud_gl.lib;wxzlibd.lib;opengl32.lib;ftgl_static_D.lib;freetype2410MT_D.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(LIBPLOT2D)/lib;$(WXWIN)\lib\vc_dll;$(GLEW)\lib\Debug\Win32;$(FREETYPE)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>wxbase31ud.lib;wxmsw31ud_adv.lib;wxbase31ud_xml.lib;wxmsw31ud_core.lib;wxmsw31ud_gl.lib;wxzlibd.lib;opengl32.lib;glew32sd.lib;freetyped.lib;libplot2d_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ResourceCompile>
@@ -63,74 +65,42 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(FREETYPE)\include;$(WXWIN)\lib\vc_lib\mswu;$(WXWIN)\include;$(FTGL)\src;./src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LIBPLOT2D)/include;$(EIGEN);$(FREETYPE)\include\freetype2;$(WXWIN)\lib\vc_lib\mswu;$(WXWIN)\include;$(GLEW)\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>WIN32;__WXMSW__;FTGL_LIBRARY_STATIC;_TFPLOTTER_64_BIT_;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;__WXMSW__;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(WXWIN)\lib\vc_lib;$(FTGL)\msvc\Build;$(FREETYPE)\objs\win32\vc2010;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>wxbase30u.lib;wxmsw30u_adv.lib;wxbase30u_xml.lib;wxexpat.lib;wxmsw30u_core.lib;wxmsw30u_gl.lib;wxzlib.lib;wxpng.lib;wxtiff.lib;wxjpeg.lib;opengl32.lib;ftgl_static.lib;freetype2410MT.lib;comctl32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(GLEW)\lib\Release\Win32;$(WXWIN)\lib\vc_lib;$(FREETYPE)\lib;$(LIBPLOT2D)/lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>wxbase31u.lib;wxmsw31u_adv.lib;wxbase31u_xml.lib;wxexpat.lib;wxmsw31u_core.lib;wxmsw31u_gl.lib;wxzlib.lib;wxpng.lib;wxtiff.lib;wxjpeg.lib;opengl32.lib;glew32s.lib;freetype.lib;comctl32.lib;rpcrt4.lib;libPlot2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(WXWIN)/include</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\application\dataManager.h" />
-    <ClInclude Include="src\application\mainFrame.h" />
-    <ClInclude Include="src\application\plotObject.h" />
-    <ClInclude Include="src\application\plotterApp.h" />
-    <ClInclude Include="src\application\tfDialog.h" />
-    <ClInclude Include="src\renderer\color.h" />
-    <ClInclude Include="src\renderer\plotRenderer.h" />
-    <ClInclude Include="src\renderer\primitives\axis.h" />
-    <ClInclude Include="src\renderer\primitives\plotCursor.h" />
-    <ClInclude Include="src\renderer\primitives\plotCurve.h" />
-    <ClInclude Include="src\renderer\primitives\primitive.h" />
-    <ClInclude Include="src\renderer\primitives\text.h" />
-    <ClInclude Include="src\renderer\primitives\zoomBox.h" />
-    <ClInclude Include="src\renderer\renderWindow.h" />
-    <ClInclude Include="src\utilities\dataset2D.h" />
-    <ClInclude Include="src\utilities\fontFinder.h" />
-    <ClInclude Include="src\utilities\machineDefinitions.h" />
-    <ClInclude Include="src\utilities\managedList.h" />
-    <ClInclude Include="src\utilities\math\complex.h" />
-    <ClInclude Include="src\utilities\math\expressionTree.h" />
-    <ClInclude Include="src\utilities\math\matrix.h" />
-    <ClInclude Include="src\utilities\math\plotMath.h" />
-    <ClInclude Include="src\utilities\math\vector.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\application\dataManager.cpp" />
-    <ClCompile Include="src\application\mainFrame.cpp" />
-    <ClCompile Include="src\application\plotObject.cpp" />
-    <ClCompile Include="src\application\plotterApp.cpp" />
-    <ClCompile Include="src\application\tfDialog.cpp" />
-    <ClCompile Include="src\renderer\color.cpp" />
-    <ClCompile Include="src\renderer\plotRenderer.cpp" />
-    <ClCompile Include="src\renderer\primitives\axis.cpp" />
-    <ClCompile Include="src\renderer\primitives\plotCursor.cpp" />
-    <ClCompile Include="src\renderer\primitives\plotCurve.cpp" />
-    <ClCompile Include="src\renderer\primitives\primitive.cpp" />
-    <ClCompile Include="src\renderer\primitives\text.cpp" />
-    <ClCompile Include="src\renderer\primitives\zoomBox.cpp" />
-    <ClCompile Include="src\renderer\renderWindow.cpp" />
-    <ClCompile Include="src\utilities\dataset2D.cpp" />
-    <ClCompile Include="src\utilities\fontFinder.cpp" />
-    <ClCompile Include="src\utilities\math\complex.cpp" />
-    <ClCompile Include="src\utilities\math\expressionTree.cpp" />
-    <ClCompile Include="src\utilities\math\matrix.cpp" />
-    <ClCompile Include="src\utilities\math\plotMath.cpp" />
-    <ClCompile Include="src\utilities\math\vector.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\res\tfPlotter.ico" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\res\tfPlotter.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\dataManager.cpp" />
+    <ClCompile Include="..\src\expressionTree.cpp" />
+    <ClCompile Include="..\src\mainFrame.cpp" />
+    <ClCompile Include="..\src\plotterApp.cpp" />
+    <ClCompile Include="..\src\tfDialog.cpp" />
+    <ClCompile Include="..\src\tfpMath.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\dataManager.h" />
+    <ClInclude Include="..\src\expressionTree.h" />
+    <ClInclude Include="..\src\mainFrame.h" />
+    <ClInclude Include="..\src\plotterApp.h" />
+    <ClInclude Include="..\src\tfDialog.h" />
+    <ClInclude Include="..\src\tfpMath.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

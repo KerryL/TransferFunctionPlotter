@@ -1,6 +1,6 @@
 /*===================================================================================
                                 TransferFunctionPlotter
-                              Copyright Kerry R. Loux 2012
+                              Copyright Kerry R. Loux 2020
 
      No requirement for distribution of wxWidgets libraries, source, or binaries.
                              (http://www.wxwidgets.org/)
@@ -11,7 +11,6 @@
 // Created:  9/18/2012
 // Author:  K. Loux
 // Description:  The application class.
-// History:
 
 #ifndef _PLOTTER_APP_H_
 #define _PLOTTER_APP_H_
