@@ -116,10 +116,10 @@ void MainFrame::CreateControls()
 	lowerPanel->SetSizer(lowerSizer);
 
 	wxWindow *upperPanel = new wxPanel(mainSplitter);
-	selectedAmplitudePlot = CreatePlotArea(upperPanel, selectedAmplitudeInterface/*, _T("Amplitude"), _T("Amplitude [dB]")*/);
-	selectedPhasePlot = CreatePlotArea(upperPanel, selectedPhaseInterface/*, _T("Phase"), _T("Phase [deg]")*/);
-	totalAmplitudePlot = CreatePlotArea(upperPanel, totalAmplitudeInterface/*, _T("Amplitude (Total)"), _T("Amplitude [dB]")*/);
-	totalPhasePlot = CreatePlotArea(upperPanel, totalPhaseInterface/*, _T("Phase (Total)"), _T("Phase [deg]")*/);
+	selectedAmplitudePlot = CreatePlotArea(upperPanel, selectedAmplitudeInterface, _T("Amplitude"), _T("Amplitude [dB]"));
+	selectedPhasePlot = CreatePlotArea(upperPanel, selectedPhaseInterface, _T("Phase"), _T("Phase [deg]"));
+	totalAmplitudePlot = CreatePlotArea(upperPanel, totalAmplitudeInterface, _T("Amplitude (Total)"), _T("Amplitude [dB]"));
+	totalPhasePlot = CreatePlotArea(upperPanel, totalPhaseInterface, _T("Phase (Total)"), _T("Phase [deg]"));
 
 	wxGridSizer *upperSizer = new wxGridSizer(2,0,0);
 	upperSizer->Add(selectedAmplitudePlot, 1, wxGROW);
@@ -158,7 +158,7 @@ void MainFrame::CreateControls()
 //		LibPlot2D::PlotRenderer* pointing to plotArea
 //
 //==========================================================================
-LibPlot2D::PlotRenderer* MainFrame::CreatePlotArea(wxWindow *parent, LibPlot2D::GuiInterface& guiInterface)
+LibPlot2D::PlotRenderer* MainFrame::CreatePlotArea(wxWindow *parent, LibPlot2D::GuiInterface& guiInterface, const wxString& title, const wxString& yLabel)
 {
 	wxGLAttributes displayAttributes;
 	displayAttributes.PlatformDefaults().RGBA().DoubleBuffer().SampleBuffers(1).Samplers(4).Stencil(1).EndList();
@@ -169,6 +169,9 @@ LibPlot2D::PlotRenderer* MainFrame::CreatePlotArea(wxWindow *parent, LibPlot2D::
 	plotArea->SetMajorGridOn();
 	plotArea->SetXLogarithmic(true);
 	plotArea->SetCurveQuality(LibPlot2D::PlotRenderer::CurveQuality::HighWrite);
+
+	//plotArea->SetTitle(title);// Titles appear to be broken...
+	plotArea->SetLeftYLabel(yLabel);
 
 	return plotArea;
 }
@@ -445,6 +448,10 @@ wxArrayString MainFrame::GetFileNameFromUser(wxString dialogTitle, wxString defa
 //==========================================================================
 void MainFrame::AddButtonClicked(wxCommandEvent& WXUNUSED(event))
 {
+	selectedAmplitudePlot->SetTitle(_T("Test1"));
+	selectedPhasePlot->SetTitle(_T("Test2"));
+	totalAmplitudePlot->SetTitle(_T("Test3"));
+	totalPhasePlot->SetTitle(_T("Test4"));
 	TFDialog dialog(this);
 	dialog.CenterOnParent();
 	if (dialog.ShowModal() != wxID_OK)

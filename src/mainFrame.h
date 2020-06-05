@@ -52,7 +52,7 @@ private:
 	void CreateControls();
 	void SetProperties();
 
-	LibPlot2D::PlotRenderer* CreatePlotArea(wxWindow *parent, LibPlot2D::GuiInterface& guiInterface);
+	LibPlot2D::PlotRenderer* CreatePlotArea(wxWindow *parent, LibPlot2D::GuiInterface& guiInterface, const wxString& title, const wxString& yLabel);
 	wxSizer* CreateButtons(wxWindow *parent);
 	wxGrid* CreateOptionsGrid(wxWindow *parent);
 	wxSizer* CreateInputControls(wxWindow *parent);
