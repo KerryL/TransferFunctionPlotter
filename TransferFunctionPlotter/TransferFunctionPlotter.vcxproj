@@ -46,7 +46,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(LIBPLOT2D)/include;$(EIGEN);$(FREETYPE)\include\freetype2;$(WXWIN)\lib\vc_dll\mswud;$(WXWIN)\include;$(GLEW)\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;__WXMSW__;__WXDEBUG__;WXUSINGDLL;GLEW_STATIC;_DATAPLOTTER_64_BIT_;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_USE_MATH_DEFINES;WIN32;_DEBUG;__WXMSW__;__WXDEBUG__;WXUSINGDLL;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -67,7 +67,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(LIBPLOT2D)/include;$(EIGEN);$(FREETYPE)\include\freetype2;$(WXWIN)\lib\vc_lib\mswu;$(WXWIN)\include;$(GLEW)\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>WIN32;NDEBUG;__WXMSW__;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_USE_MATH_DEFINES;WIN32;NDEBUG;__WXMSW__;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

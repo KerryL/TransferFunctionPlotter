@@ -170,7 +170,7 @@ LibPlot2D::PlotRenderer* MainFrame::CreatePlotArea(wxWindow *parent, LibPlot2D::
 	plotArea->SetXLogarithmic(true);
 	plotArea->SetCurveQuality(LibPlot2D::PlotRenderer::CurveQuality::HighWrite);
 
-	//plotArea->SetTitle(title);// Titles appear to be broken...
+	plotArea->SetTitle(title);
 	plotArea->SetLeftYLabel(yLabel);
 
 	return plotArea;
@@ -448,10 +448,6 @@ wxArrayString MainFrame::GetFileNameFromUser(wxString dialogTitle, wxString defa
 //==========================================================================
 void MainFrame::AddButtonClicked(wxCommandEvent& WXUNUSED(event))
 {
-	selectedAmplitudePlot->SetTitle(_T("Test1"));
-	selectedPhasePlot->SetTitle(_T("Test2"));
-	totalAmplitudePlot->SetTitle(_T("Test3"));
-	totalPhasePlot->SetTitle(_T("Test4"));
 	TFDialog dialog(this);
 	dialog.CenterOnParent();
 	if (dialog.ShowModal() != wxID_OK)
