@@ -59,32 +59,11 @@
 //
 //==========================================================================
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, wxEmptyString, wxDefaultPosition,
-	wxDefaultSize, wxDEFAULT_FRAME_STYLE), selectedAmplitudeInterface(this),
-	selectedPhaseInterface(this), totalAmplitudeInterface(this), totalPhaseInterface(this)
+	wxDefaultSize, wxDEFAULT_FRAME_STYLE), individualAmplitudeInterface(this),
+	individualPhaseInterface(this), totalAmplitudeInterface(this), totalPhaseInterface(this)
 {
 	CreateControls();
 	SetProperties();
-}
-
-//==========================================================================
-// Class:			MainFrame
-// Function:		~MainFrame
-//
-// Description:		Denstructor for MainFrame class.  Frees memory and
-//					releases GUI object managers.
-//
-// Input Arguments:
-//		None
-//
-// Output Arguments:
-//		None
-//
-// Return Value:
-//		None
-//
-//==========================================================================
-MainFrame::~MainFrame()
-{
 }
 
 //==========================================================================
@@ -116,15 +95,15 @@ void MainFrame::CreateControls()
 	lowerPanel->SetSizer(lowerSizer);
 
 	wxWindow *upperPanel = new wxPanel(mainSplitter);
-	selectedAmplitudePlot = CreatePlotArea(upperPanel, selectedAmplitudeInterface, _T("Amplitude"), _T("Amplitude [dB]"));
-	selectedPhasePlot = CreatePlotArea(upperPanel, selectedPhaseInterface, _T("Phase"), _T("Phase [deg]"));
+	individualAmplitudePlot = CreatePlotArea(upperPanel, individualAmplitudeInterface, _T("Amplitude"), _T("Amplitude [dB]"));
+	individualPhasePlot = CreatePlotArea(upperPanel, individualPhaseInterface, _T("Phase"), _T("Phase [deg]"));
 	totalAmplitudePlot = CreatePlotArea(upperPanel, totalAmplitudeInterface, _T("Amplitude (Total)"), _T("Amplitude [dB]"));
 	totalPhasePlot = CreatePlotArea(upperPanel, totalPhaseInterface, _T("Phase (Total)"), _T("Phase [deg]"));
 
 	wxGridSizer *upperSizer = new wxGridSizer(2,0,0);
-	upperSizer->Add(selectedAmplitudePlot, 1, wxGROW);
+	upperSizer->Add(individualAmplitudePlot, 1, wxGROW);
 	upperSizer->Add(totalAmplitudePlot, 1, wxGROW);
-	upperSizer->Add(selectedPhasePlot, 1, wxGROW);
+	upperSizer->Add(individualPhasePlot, 1, wxGROW);
 	upperSizer->Add(totalPhasePlot, 1, wxGROW);
 	upperPanel->SetSizer(upperSizer);
 
@@ -483,7 +462,7 @@ void MainFrame::RemoveButtonClicked(wxCommandEvent& WXUNUSED(event))
 		RemoveCurve(selection[i] - 1);
 	}
 
-	UpdatePlots();
+	UpdatePlotDisplays();
 }
 
 //==========================================================================
@@ -505,7 +484,7 @@ void MainFrame::RemoveButtonClicked(wxCommandEvent& WXUNUSED(event))
 void MainFrame::RemoveAllButtonClicked(wxCommandEvent& WXUNUSED(event))
 {
 	ClearAllCurves();
-	UpdatePlots();
+	UpdatePlotDisplays();
 }
 
 //==========================================================================
@@ -548,12 +527,12 @@ void MainFrame::CreateGridContextMenu(const wxPoint &position, const unsigned in
 //==========================================================================
 void MainFrame::ClearAllCurves()
 {
-	selectedAmplitudeInterface.ClearAllCurves();
-	selectedPhaseInterface.ClearAllCurves();
+	individualAmplitudeInterface.ClearAllCurves();
+	individualPhaseInterface.ClearAllCurves();
 	totalAmplitudeInterface.ClearAllCurves();
 	totalPhaseInterface.ClearAllCurves();
 
-	UpdatePlots();
+	UpdatePlotDisplays();
 }
 
 //==========================================================================
@@ -590,10 +569,10 @@ void MainFrame::AddCurve(wxString numerator, wxString denominator)
 	totalAmplitudeInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetTotalAmplitudeData()), _T("Total Amplitude"));
 	totalPhaseInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetTotalPhaseData()), _T("Total Phase"));
 
-	selectedAmplitudeInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetAmplitudeData(index - 1)), _T(""));
-	selectedPhaseInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetPhaseData(index - 1)), _T(""));
+	individualAmplitudeInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetAmplitudeData(index - 1)), wxEmptyString);
+	individualPhaseInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetPhaseData(index - 1)), wxEmptyString);
 	UpdateCurveProperties(index - 1, GetNextColor(index), true, false);
-	UpdatePlots();
+	UpdatePlotDisplays();
 }
 
 //==========================================================================
@@ -620,7 +599,7 @@ void MainFrame::UpdateCurve(unsigned int i, wxString numerator, wxString denomin
 		return;
 
 	optionsGrid->SetCellValue(i + 1, 0, "(" + numerator + ")/(" + denominator + ")");
-	UpdatePlots();
+	UpdatePlotData();
 }
 
 //==========================================================================
@@ -781,8 +760,8 @@ void MainFrame::RemoveCurve(const unsigned int &i)
 	}
 	else
 	{
-		selectedAmplitudeInterface.RemoveCurve(i);
-		selectedPhaseInterface.RemoveCurve(i);
+		individualAmplitudeInterface.RemoveCurve(i);
+		individualPhaseInterface.RemoveCurve(i);
 
 		totalAmplitudeInterface.ClearAllCurves();
 		totalPhaseInterface.ClearAllCurves();
@@ -975,11 +954,13 @@ void MainFrame::UpdateCurveProperties(const unsigned int &index, const LibPlot2D
 {
 	unsigned long lineSize;
 	optionsGrid->GetCellValue(index + 1, colLineSize).ToULong(&lineSize);
-	selectedAmplitudePlot->SetCurveProperties(index, color, visible, rightAxis, lineSize, -1);
-	selectedPhasePlot->SetCurveProperties(index, color, visible, rightAxis, lineSize, -1);
+	individualAmplitudePlot->SetCurveProperties(index, color, visible, rightAxis, lineSize, -1);
+	individualPhasePlot->SetCurveProperties(index, color, visible, rightAxis, lineSize, -1);
 
-	totalAmplitudePlot->SetCurveProperties(0, LibPlot2D::Color::ColorBlue, true, false, 1, 0);
-	totalPhasePlot->SetCurveProperties(0, LibPlot2D::Color::ColorBlue, true, false, 1, 0);
+	if (totalAmplitudeInterface.GetCurveCount() > 0)
+		totalAmplitudePlot->SetCurveProperties(0, LibPlot2D::Color::ColorBlue, true, false, 1, 0);
+	if (totalPhaseInterface.GetCurveCount() > 0)
+		totalPhasePlot->SetCurveProperties(0, LibPlot2D::Color::ColorBlue, true, false, 1, 0);
 }
 
 //==========================================================================
@@ -1075,8 +1056,8 @@ void MainFrame::SetXLabels()
 	else
 		xLabel = _T("Frequency [rad/sec]");
 
-	selectedAmplitudeInterface.SetXDataLabel(xLabel);
-	selectedPhaseInterface.SetXDataLabel(xLabel);
+	individualAmplitudeInterface.SetXDataLabel(xLabel);
+	individualPhaseInterface.SetXDataLabel(xLabel);
 	totalAmplitudeInterface.SetXDataLabel(xLabel);
 	totalPhaseInterface.SetXDataLabel(xLabel);
 }
@@ -1104,7 +1085,7 @@ void MainFrame::TextBoxChangeEvent(wxFocusEvent& event)
 	if (minFrequencyTextBox->GetValue().ToDouble(&min) &&
 		maxFrequencyTextBox->GetValue().ToDouble(&max))
 		dataManager.SetFrequencyRange(min, max);
-	UpdatePlots();
+	UpdatePlotData();
 	event.Skip();// Without skipping the event, the cursot gets stuck in the box and we never loose focus
 }
 
@@ -1131,14 +1112,14 @@ void MainFrame::RadioButtonChangeEvent(wxCommandEvent& WXUNUSED(event))
 		dataManager.SetFrequencyUnitsHertz();
 	else
 		dataManager.SetFrequencyUnitsRadPerSec();
-	UpdatePlots();
+	UpdatePlotData();
 }
 
 //==========================================================================
 // Class:			MainFrame
-// Function:		UpdatePlots
+// Function:		UpdatePlotData
 //
-// Description:		Updates all rendered plots.
+// Description:		Updates data for all rendered plots.
 //
 // Input Arguments:
 //		None
@@ -1150,11 +1131,48 @@ void MainFrame::RadioButtonChangeEvent(wxCommandEvent& WXUNUSED(event))
 //		None
 //
 //==========================================================================
-void MainFrame::UpdatePlots()
+void MainFrame::UpdatePlotData()
 {
 	dataManager.UpdateTotalTransferFunctionData();
-	selectedAmplitudePlot->UpdateDisplay();
-	selectedPhasePlot->UpdateDisplay();
+
+	individualAmplitudeInterface.ClearAllCurves();
+	individualPhaseInterface.ClearAllCurves();
+	totalAmplitudeInterface.ClearAllCurves();
+	totalPhaseInterface.ClearAllCurves();
+
+	for (unsigned int i = 0; i < dataManager.GetCount(); ++i)
+	{
+		individualAmplitudeInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetAmplitudeData(i)), wxEmptyString);
+		individualPhaseInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetPhaseData(i)), wxEmptyString);
+		UpdateCurveProperties(i);
+	}
+
+	totalAmplitudeInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetTotalAmplitudeData()), _T("Total Amplitude"));
+	totalPhaseInterface.AddCurve(std::make_unique<LibPlot2D::Dataset2D>(dataManager.GetTotalPhaseData()), _T("Total Phase"));
+
+	UpdatePlotDisplays();
+}
+
+//==========================================================================
+// Class:			MainFrame
+// Function:		UpdatePlotDisplays
+//
+// Description:		Updates rendering of all rendered plots.
+//
+// Input Arguments:
+//		None
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
+void MainFrame::UpdatePlotDisplays()
+{
+	individualAmplitudePlot->UpdateDisplay();
+	individualPhasePlot->UpdateDisplay();
 	totalAmplitudePlot->UpdateDisplay();
 	totalPhasePlot->UpdateDisplay();
 }

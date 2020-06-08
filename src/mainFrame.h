@@ -45,7 +45,7 @@ class MainFrame : public wxFrame
 {
 public:
 	MainFrame();
-	~MainFrame();
+	~MainFrame() = default;
 
 private:
 	// Functions that do some of the frame initialization and control positioning
@@ -65,13 +65,13 @@ private:
 	wxTextCtrl *minFrequencyTextBox;
 	wxTextCtrl *maxFrequencyTextBox;
 
-	LibPlot2D::PlotRenderer *selectedAmplitudePlot;
-	LibPlot2D::PlotRenderer *selectedPhasePlot;
+	LibPlot2D::PlotRenderer *individualAmplitudePlot;
+	LibPlot2D::PlotRenderer *individualPhasePlot;
 	LibPlot2D::PlotRenderer *totalAmplitudePlot;
 	LibPlot2D::PlotRenderer *totalPhasePlot;
 
-	LibPlot2D::GuiInterface selectedAmplitudeInterface;
-	LibPlot2D::GuiInterface selectedPhaseInterface;
+	LibPlot2D::GuiInterface individualAmplitudeInterface;
+	LibPlot2D::GuiInterface individualPhaseInterface;
 	LibPlot2D::GuiInterface totalAmplitudeInterface;
 	LibPlot2D::GuiInterface totalPhaseInterface;
 
@@ -109,8 +109,6 @@ private:
 		const bool &visible, const bool &rightAxis);
 	void UpdateCurveProperties(const unsigned int &index);
 
-	void UpdateSelectedTransferFunction(const unsigned int &i);
-
 	void SetXLabels();
 	wxString xLabel;
 
@@ -141,19 +139,14 @@ private:
 	void GridCellChangeEvent(wxGridEvent &event);
 	// End event handlers-------------------------------------------------
 
-	bool XScalingFactorIsKnown(double &factor, wxString *label) const;
-	bool UnitStringToFactor(const wxString &unit, double &factor) const;
-	wxString ExtractUnitFromDescription(const wxString &description) const;
-	bool FindWrappedString(const wxString &s, wxString &contents,
-		const wxChar &open, const wxChar &close) const;
-
 	void UpdateSingleCursorValue(const unsigned int &row, double value,
 		const unsigned int &column, const bool &isVisible);
 
 	wxArrayString GetFileNameFromUser(wxString dialogTitle, wxString defaultDirectory,
 		wxString defaultFileName, wxString wildcard, long style);
 
-	void UpdatePlots();
+	void UpdatePlotData();
+	void UpdatePlotDisplays();
 
 	DECLARE_EVENT_TABLE();
 };

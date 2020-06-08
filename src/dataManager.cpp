@@ -70,8 +70,7 @@ bool DataManager::UpdateTransferFunction(const unsigned int &i, const wxString &
 	assert(magnitude.GetNumberOfPoints() == amplitudePlots[i]->GetNumberOfPoints());
 	assert(phase.GetNumberOfPoints() == phasePlots[i]->GetNumberOfPoints());
 
-	unsigned int j;
-	for (j = 0; j < magnitude.GetNumberOfPoints(); j++)
+	for (unsigned int j = 0; j < magnitude.GetNumberOfPoints(); j++)
 	{
 		amplitudePlots[i]->GetX()[j] = magnitude.GetX()[j];
 		amplitudePlots[i]->GetY()[j] = magnitude.GetY()[j];
