@@ -70,7 +70,7 @@ bool DataManager::UpdateTransferFunction(const unsigned int &i, const wxString &
 	assert(magnitude.GetNumberOfPoints() == amplitudePlots[i]->GetNumberOfPoints());
 	assert(phase.GetNumberOfPoints() == phasePlots[i]->GetNumberOfPoints());
 
-	for (unsigned int j = 0; j < magnitude.GetNumberOfPoints(); j++)
+	for (unsigned int j = 0; j < magnitude.GetNumberOfPoints(); ++j)
 	{
 		amplitudePlots[i]->GetX()[j] = magnitude.GetX()[j];
 		amplitudePlots[i]->GetY()[j] = magnitude.GetY()[j];
@@ -113,8 +113,7 @@ void DataManager::SetFrequencyRange(const double &min, const double &max)
 wxString DataManager::ConstructTotalTransferFunction() const
 {
 	wxString totalNum, totalDen;
-	unsigned int i;
-	for (i = 0; i < transferFunctions.size(); i++)
+	for (unsigned int i = 0; i < transferFunctions.size(); ++i)
 	{
 		totalNum.Append(_T("(") + transferFunctions[i].first + _T(")"));
 		totalDen.Append(_T("(") + transferFunctions[i].second + _T(")"));
@@ -174,8 +173,7 @@ void DataManager::RemoveTransferFunctions(const unsigned int &i)
 
 void DataManager::UpdateAllTransferFunctionData()
 {
-	unsigned int i;
-	for (i = 0; i < amplitudePlots.GetCount(); i++)
+	for (unsigned int i = 0; i < amplitudePlots.GetCount(); ++i)
 		UpdateTransferFunction(i, transferFunctions[i].first, transferFunctions[i].second);
 
 	UpdateTotalTransferFunctionData();

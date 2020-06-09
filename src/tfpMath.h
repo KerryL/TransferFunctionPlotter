@@ -48,9 +48,7 @@ template<typename T>
 std::vector<T> TFPMath::operator+(const std::vector<T>& a, const std::vector<T>& b)
 {
 	std::vector<T> result(a.size());
-
-	unsigned int i;
-	for (i = 0; i < result.size(); i++)
+	for (unsigned int i = 0; i < result.size(); ++i)
 		result[i] = a[i] + b[i];
 
 	return result;
@@ -60,9 +58,7 @@ template<typename T>
 std::vector<T> TFPMath::operator-(const std::vector<T>& a, const std::vector<T>& b)
 {
 	std::vector<T> result(a.size());
-
-	unsigned int i;
-	for (i = 0; i < result.size(); i++)
+	for (unsigned int i = 0; i < result.size(); ++i)
 		result[i] = a[i] - b[i];
 
 	return result;
@@ -72,9 +68,7 @@ template<typename T>
 std::vector<T> TFPMath::operator*(const std::vector<T>& a, const std::vector<T>& b)
 {
 	std::vector<T> result(a.size());
-
-	unsigned int i;
-	for (i = 0; i < result.size(); i++)
+	for (unsigned int i = 0; i < result.size(); ++i)
 		result[i] = a[i] * b[i];
 
 	return result;
@@ -84,9 +78,7 @@ template<typename T>
 std::vector<T> TFPMath::operator/(const std::vector<T>& a, const std::vector<T>& b)
 {
 	std::vector<T> result(a.size());
-
-	unsigned int i;
-	for (i = 0; i < result.size(); i++)
+	for (unsigned int i = 0; i < result.size(); ++i)
 		result[i] = a[i] / b[i];
 
 	return result;

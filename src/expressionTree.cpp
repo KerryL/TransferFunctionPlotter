@@ -131,15 +131,15 @@ wxString ExpressionTree::CheckExpression(wxString expression)
 wxString ExpressionTree::ParseExpression(const wxString &expression)
 {
 	std::stack<wxString> operatorStack;
-	unsigned int i, advance;
 	bool lastWasOperator(true);
 	wxString errorString;
 
-	for (i = 0; i < expression.Len(); ++i)
+	for (unsigned int i = 0; i < expression.Len(); ++i)
 	{
 		if (expression.Mid(i, 1).Trim().IsEmpty())
 			continue;
 
+		unsigned int advance;
 		errorString = ParseNext(expression.Mid(i), lastWasOperator,
 			advance, operatorStack);
 		if (!errorString.IsEmpty())
@@ -230,8 +230,7 @@ void ExpressionTree::PrepareDataset(const double &minFreq, const double &maxFreq
 	magnitude.Resize(resolution);
 	dataVector.assign(resolution, LibPlot2D::Complex(0.0, 0.0));
 
-	unsigned int i;
-	for (i = 0; i < resolution; i++)
+	for (unsigned int i = 0; i < resolution; ++i)
 	{
 		magnitude.GetX()[i] = pow(10.0,
 			(double)i / (double)(resolution - 1) * log10(maxFreq / minFreq) + log10(minFreq));
@@ -781,8 +780,7 @@ std::vector<LibPlot2D::Complex> ExpressionTree::ApplyOperation(const wxString &o
 	else if (operation.Cmp(_T("^")) == 0)
 	{
 		std::vector<LibPlot2D::Complex> result(first.size());
-		unsigned int i;
-		for (i = 0; i < result.size(); i++)
+		for (unsigned int i = 0; i < result.size(); ++i)
 			result[i] = vector[i].ToPower(first[i]);
 		return result;
 	}
@@ -824,8 +822,7 @@ std::vector<LibPlot2D::Complex> ExpressionTree::ApplyOperation(const wxString &o
 	else if (operation.Cmp(_T("^")) == 0)
 	{
 		std::vector<LibPlot2D::Complex> result(second.size());
-		unsigned int i;
-		for (i = 0; i < result.size(); i++)
+		for (unsigned int i = 0; i < result.size(); ++i)
 			result[i] = second[i].ToPower(vector[i]);
 		return result;
 	}
@@ -866,8 +863,7 @@ std::vector<LibPlot2D::Complex> ExpressionTree::ApplyOperation(const wxString &o
 	else if (operation.Cmp(_T("^")) == 0)
 	{
 		std::vector<LibPlot2D::Complex> result(first.size());
-		unsigned int i;
-		for (i = 0; i < result.size(); ++i)
+		for (unsigned int i = 0; i < result.size(); ++i)
 			result[i] = second[i].ToPower(first[i]);
 		return result;
 	}

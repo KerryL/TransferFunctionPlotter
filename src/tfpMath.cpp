@@ -43,9 +43,7 @@
 LibPlot2D::Dataset2D TFPMath::GetMagnitudeData(const std::vector<LibPlot2D::Complex> &data)
 {
 	LibPlot2D::Dataset2D result(data.size());
-
-	unsigned int i;
-	for (i = 0; i < result.GetNumberOfPoints(); i++)
+	for (unsigned int i = 0; i < result.GetNumberOfPoints(); ++i)
 		result.GetY()[i] = sqrt(data[i].mReal * data[i].mReal + data[i].mImaginary * data[i].mImaginary);
 
 	return result;
@@ -72,9 +70,7 @@ LibPlot2D::Dataset2D TFPMath::GetMagnitudeData(const std::vector<LibPlot2D::Comp
 LibPlot2D::Dataset2D TFPMath::GetPhaseData(const std::vector<LibPlot2D::Complex> &data)
 {
 	LibPlot2D::Dataset2D result(data.size());
-
-	unsigned int i;
-	for (i = 0; i < result.GetNumberOfPoints(); i++)
+	for (unsigned int i = 0; i < result.GetNumberOfPoints(); ++i)
 		result.GetY()[i] = atan2(data[i].mImaginary, data[i].mReal);
 
 	LibPlot2D::PlotMath::Unwrap(result);
@@ -102,9 +98,7 @@ LibPlot2D::Dataset2D TFPMath::GetPhaseData(const std::vector<LibPlot2D::Complex>
 LibPlot2D::Dataset2D TFPMath::ConvertToDecibels(const LibPlot2D::Dataset2D &data)
 {
 	LibPlot2D::Dataset2D results(data);
-
-	unsigned int i;
-	for (i = 0; i < results.GetNumberOfPoints(); i++)
+	for (unsigned int i = 0; i < results.GetNumberOfPoints(); ++i)
 		results.GetY()[i] = 20.0 * log10(data.GetY()[i]);
 
 	return results;

@@ -287,7 +287,7 @@ wxGrid* MainFrame::CreateOptionsGrid(wxWindow *parent)
 	optionsGrid->SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
 
 	unsigned int i;
-	for (i = 1; i < colCount; i++)// Skip the name column
+	for (i = 1; i < colCount; ++i)// Skip the name column
 		optionsGrid->AutoSizeColLabelSize(i);
 
 	optionsGrid->EndBatch();
@@ -459,7 +459,7 @@ void MainFrame::RemoveButtonClicked(wxCommandEvent& WXUNUSED(event))
 		return *b - *a;
 	});
 
-	for (unsigned i = 0; i < selection.Count(); i++)
+	for (unsigned i = 0; i < selection.Count(); ++i)
 	{
 		if (selection[i] == 0)
 			continue;
@@ -625,9 +625,7 @@ void MainFrame::UpdateCurve(unsigned int i, wxString numerator, wxString denomin
 void MainFrame::AddXRowToGrid()
 {
 	optionsGrid->AppendRows();
-
-	unsigned int i;
-	for (i = 0; i < colCount; i++)
+	for (unsigned int i = 0; i < colCount; ++i)
 		optionsGrid->SetReadOnly(0, i, true);
 
 	optionsGrid->SetCellValue(0, 0, xLabel);
@@ -660,8 +658,7 @@ unsigned int MainFrame::AddDataRowToGrid(const wxString &name)
 	optionsGrid->SetCellRenderer(index, colRightAxis, new wxGridCellBoolRenderer);
 	optionsGrid->SetCellEditor(index, colLineSize, new wxGridCellNumberEditor(1, maxLineSize));
 
-	unsigned int i;
-	for (i = 0; i < colCount; i++)
+	for (unsigned int i = 0; i < colCount; ++i)
 			optionsGrid->SetReadOnly(index, i, true);
 	optionsGrid->SetReadOnly(index, colLineSize, false);
 	optionsGrid->SetCellValue(index, colName, name);
