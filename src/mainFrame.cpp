@@ -229,8 +229,8 @@ wxSizer* MainFrame::CreateInputControls(wxWindow *parent)
 	maxFrequencyTextBox = new wxTextCtrl(parent, wxID_ANY, wxString::Format("%0.1f", maxFreq));
 	dataManager.SetFrequencyRange(minFreq, maxFreq);
 
-	minFrequencyTextBox->Connect(wxEVT_KILL_FOCUS, wxFocusEventHandler(MainFrame::TextBoxChangeEvent), NULL, this);
-	maxFrequencyTextBox->Connect(wxEVT_KILL_FOCUS, wxFocusEventHandler(MainFrame::TextBoxChangeEvent), NULL, this);
+	minFrequencyTextBox->Connect(wxEVT_KILL_FOCUS, wxFocusEventHandler(MainFrame::TextBoxChangeEvent), nullptr, this);
+	maxFrequencyTextBox->Connect(wxEVT_KILL_FOCUS, wxFocusEventHandler(MainFrame::TextBoxChangeEvent), nullptr, this);
 
 	wxFlexGridSizer *gridSizer = new wxFlexGridSizer(2, 5, 5);
 	gridSizer->Add(minFreqLabel);
@@ -454,8 +454,12 @@ void MainFrame::AddButtonClicked(wxCommandEvent& WXUNUSED(event))
 void MainFrame::RemoveButtonClicked(wxCommandEvent& WXUNUSED(event))
 {
 	wxArrayInt selection = optionsGrid->GetSelectedRows();
-	unsigned int i;
-	for (i = 0; i < selection.Count(); i++)
+	selection.Sort([](int* a, int* b)
+	{
+		return *b - *a;
+	});
+
+	for (unsigned i = 0; i < selection.Count(); i++)
 	{
 		if (selection[i] == 0)
 			continue;

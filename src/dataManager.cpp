@@ -133,7 +133,7 @@ void DataManager::UpdateTotalTransferFunctionData()
 	if (!totalNeedsUpdate)
 		return;
 
-	wxString totalTF = ConstructTotalTransferFunction();
+	const wxString totalTF(ConstructTotalTransferFunction());
 
 	if (totalTF.IsEmpty())
 		return;
@@ -183,6 +183,8 @@ void DataManager::UpdateAllTransferFunctionData()
 
 wxString DataManager::AssembleTransferFunctionString(const wxString &numerator, const wxString &denominator) const
 {
+	if (numerator.IsEmpty() && denominator.IsEmpty())
+		return wxEmptyString;
 	return "(" + numerator + ")/(" + denominator + ")";
 }
 

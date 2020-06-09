@@ -87,7 +87,7 @@ bool ExpressionTree::ParenthesesBalanced(const wxString &expression) const
 
 	while (location != wxNOT_FOUND)
 	{
-		leftCount++;
+		++leftCount;
 		location = expression.find(_T("("), location + 1);
 	}
 
@@ -95,7 +95,7 @@ bool ExpressionTree::ParenthesesBalanced(const wxString &expression) const
 
 	while (location != wxNOT_FOUND)
 	{
-		rightCount++;
+		++rightCount;
 		location = expression.find(_T(")"), location + 1);
 	}
 
@@ -132,35 +132,76 @@ wxString ExpressionTree::ParseExpression(const wxString &expression)
 {
 	std::stack<wxString> operatorStack;
 	unsigned int i, advance;
-	for (i = 0; i < expression.Len(); i++)
+	bool lastWasOperator(true);
+	wxString errorString;
+
+	for (i = 0; i < expression.Len(); ++i)
 	{
 		if (expression.Mid(i, 1).Trim().IsEmpty())
 			continue;
 
-		if (NextIsNumber(expression.Mid(i), &advance))
-			outputQueue.push(expression.Mid(i, advance));
-		else if (NextIsS(expression.Mid(i), &advance))
-			outputQueue.push(expression.Mid(i, advance));
-		else if (NextIsOperator(expression.Mid(i), &advance))
-			ProcessOperator(operatorStack, expression.Mid(i, advance));
-		else if (expression[i] == '(')
-		{
-			operatorStack.push(expression.Mid(i, 1));
-			advance = 1;
-		}
-		else if (expression[i] == ')')
-		{
-			ProcessCloseParenthese(operatorStack);
-			advance = 1;
-		}
-		else
-			return _T("Unrecognized character:  '") + expression.Mid(i, 1) + _T("'.");
-
+		errorString = ParseNext(expression.Mid(i), lastWasOperator,
+			advance, operatorStack);
+		if (!errorString.IsEmpty())
+			return errorString;
 		i += advance - 1;
 	}
 
 	if (!EmptyStackToQueue(operatorStack))
-		return _T("Imbalanced parentheses!");
+		errorString = _T("Imbalanced parentheses!");
+
+	return errorString;
+}
+
+//=============================================================================
+// Class:			ExpressionTree
+// Function:		ParseNext
+//
+// Description:		Parses the expression and processes the next item.
+//
+// Input Arguments:
+//		expression		= const wxString&
+//		lastWasOperator	= bool&
+//		advance			= unsigned int&
+//		operatorStack	= std::stack<wxString>&
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		wxString containing any errors
+//
+//=============================================================================
+wxString ExpressionTree::ParseNext(const wxString &expression,
+	bool &lastWasOperator, unsigned int &advance,
+	std::stack<wxString> &operatorStack)
+{
+	bool thisWasOperator(false);
+	if (NextIsNumber(expression, &advance, lastWasOperator))
+		outputQueue.push(expression.Mid(0, advance));
+	else if (NextIsS(expression, &advance))
+		outputQueue.push(expression.Mid(0, advance));
+	else if (NextIsOperator(expression, &advance))
+	{
+		ProcessOperator(operatorStack, expression.Mid(0, advance));
+		thisWasOperator = true;
+	}
+	else if (expression[0] == '(')
+	{
+		if (!lastWasOperator)
+			operatorStack.push(_T("*"));
+		operatorStack.push(expression[0]);
+		advance = 1;
+		thisWasOperator = true;	}
+	else if (expression[0] == ')')
+	{
+		ProcessCloseParenthese(operatorStack);
+		advance = 1;
+	}
+	else
+		return _T("Unrecognized character:  '") + expression.Mid(0, 1) + _T("'.");
+
+	lastWasOperator = thisWasOperator;
 	return wxEmptyString;
 }
 
@@ -293,9 +334,6 @@ wxString ExpressionTree::EvaluateExpression()
 	std::stack<std::vector<LibPlot2D::Complex>> vectorStack;
 	std::stack<bool> useDoubleStack;
 
-	if (NextIsOperator(outputQueue.front()))// Special handling in case of "-3*..."
-		PushToStack(0.0, doubleStack, useDoubleStack);
-
 	while (!outputQueue.empty())
 	{
 		next = outputQueue.front();
@@ -305,6 +343,8 @@ wxString ExpressionTree::EvaluateExpression()
 			return errorString;
 	}
 
+	if (useDoubleStack.size() > 1)
+		return _T("Not enough operators!");
 	if (useDoubleStack.top())
 		return _T("Expression evaluates to a number!");
 	else
@@ -370,7 +410,9 @@ bool ExpressionTree::EmptyStackToQueue(std::stack<wxString> &stack)
 // Description:		Determines if the next portion of the expression is a number.
 //
 // Input Arguments:
-//		s		= const wxString& containing the expression
+//		s				= const wxString& containing the expression
+//		lastWasOperator	= const bool& indicating whether or not the last thing
+//						  on the stack is an operator
 //
 // Output Arguments:
 //		stop	= unsigned int* (optional) indicating length of number
@@ -379,17 +421,19 @@ bool ExpressionTree::EmptyStackToQueue(std::stack<wxString> &stack)
 //		bool, true if a number is next in the expression
 //
 //==========================================================================
-bool ExpressionTree::NextIsNumber(const wxString &s, unsigned int *stop) const
+bool ExpressionTree::NextIsNumber(const wxString &s, unsigned int *stop,
+	const bool &lastWasOperator) const
 {
 	if (s.Len() == 0)
 		return false;
 
 	bool foundDecimal = s[0] == '.';
 	if (foundDecimal ||
-		(int(s[0]) >= int('0') && int(s[0]) <= int('9')))
+		(int(s[0]) >= int('0') && int(s[0]) <= int('9')) ||
+		(s[0] == '-' && lastWasOperator && NextIsNumber(s.Mid(1), nullptr, false)))
 	{
 		unsigned int i;
-		for (i = 1; i < s.Len(); i++)
+		for (i = 1; i < s.Len(); ++i)
 		{
 			if (s[i] == '.')
 			{
@@ -608,7 +652,7 @@ void ExpressionTree::PushToStack(const double &value, std::stack<double> &double
 //
 // Input Arguments:
 //		vector			= const std::vector<LibPlot2D::Complex>&
-//		vectorStack		= std::stack<std::vector<LibPlot2D::Complex> >&
+//		vectorStack		= std::stack<std::vector<LibPlot2D::Complex>>&
 //		useDoubleStack	= std::stack<bool>&
 //
 // Output Arguments:
@@ -618,7 +662,7 @@ void ExpressionTree::PushToStack(const double &value, std::stack<double> &double
 //		None
 //
 //==========================================================================
-void ExpressionTree::PushToStack(const std::vector<LibPlot2D::Complex> &vector, std::stack<std::vector<LibPlot2D::Complex> > &vectorStack,
+void ExpressionTree::PushToStack(const std::vector<LibPlot2D::Complex> &vector, std::stack<std::vector<LibPlot2D::Complex>> &vectorStack,
 	std::stack<bool> &useDoubleStack) const
 {
 	vectorStack.push(vector);
@@ -633,7 +677,7 @@ void ExpressionTree::PushToStack(const std::vector<LibPlot2D::Complex> &vector, 
 //
 // Input Arguments:
 //		doubleStack		= std::stack<double>&
-//		vectorStack		= std::stack<std::vector<LibPlot2D::Complex> >&
+//		vectorStack		= std::stack<std::vector<LibPlot2D::Complex>>&
 //		useDoubleStack	= std::stack<bool>&
 //
 // Output Arguments:
@@ -644,7 +688,7 @@ void ExpressionTree::PushToStack(const std::vector<LibPlot2D::Complex> &vector, 
 //		bool, true if a double was popped, false if a dataset was popped
 //
 //==========================================================================
-bool ExpressionTree::PopFromStack(std::stack<double> &doubleStack, std::stack<std::vector<LibPlot2D::Complex> > &vectorStack,
+bool ExpressionTree::PopFromStack(std::stack<double> &doubleStack, std::stack<std::vector<LibPlot2D::Complex>> &vectorStack,
 	std::stack<bool> &useDoubleStack, double &value, std::vector<LibPlot2D::Complex> &vector) const
 {
 	assert(!useDoubleStack.empty());
@@ -823,7 +867,7 @@ std::vector<LibPlot2D::Complex> ExpressionTree::ApplyOperation(const wxString &o
 	{
 		std::vector<LibPlot2D::Complex> result(first.size());
 		unsigned int i;
-		for (i = 0; i < result.size(); i++)
+		for (i = 0; i < result.size(); ++i)
 			result[i] = second[i].ToPower(first[i]);
 		return result;
 	}
@@ -841,7 +885,7 @@ std::vector<LibPlot2D::Complex> ExpressionTree::ApplyOperation(const wxString &o
 // Input Arguments:
 //		operator		= const wxString& describing the function to apply
 //		doubleStack		= std::stack<double>&
-//		vectorStack		= std::stack<std::vector<Complex> >&
+//		vectorStack		= std::stack<std::vector<Complex>>&
 //		useDoubleStack	= std::stack<bool>&
 //
 // Output Arguments:
@@ -852,16 +896,13 @@ std::vector<LibPlot2D::Complex> ExpressionTree::ApplyOperation(const wxString &o
 //
 //==========================================================================
 bool ExpressionTree::EvaluateOperator(const wxString &operation, std::stack<double> &doubleStack,
-	std::stack<std::vector<LibPlot2D::Complex> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const
+	std::stack<std::vector<LibPlot2D::Complex>> &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const
 {
 	double value1, value2;
 	std::vector<LibPlot2D::Complex> vector1, vector2;
 
 	if (useDoubleStack.size() < 2)
-	{
-		errorString = _T("Attempting to apply operator without two operands!");
-		return false;
-	}
+		return EvaluateUnaryOperator(operation, doubleStack, vectorStack, useDoubleStack, errorString);
 	else if (PopFromStack(doubleStack, vectorStack, useDoubleStack, value1, vector1))
 	{
 		if (PopFromStack(doubleStack, vectorStack, useDoubleStack, value2, vector2))
@@ -873,6 +914,45 @@ bool ExpressionTree::EvaluateOperator(const wxString &operation, std::stack<doub
 		PushToStack(ApplyOperation(operation, vector1, value2), vectorStack, useDoubleStack);
 	else
 		PushToStack(ApplyOperation(operation, vector1, vector2), vectorStack, useDoubleStack);
+	return true;
+}
+
+//=============================================================================
+// Class:			ExpressionTree
+// Function:		EvaluateUnaryOperator
+//
+// Description:		Evaluates the operator specified.  The only unary operator
+//					we recognize is minus (negation).
+//
+// Input Arguments:
+//		operator		= const wxString& describing the function to apply
+//		doubleStack		= std::stack<double>&
+//		vectorStack		= std::stack<std::vector<LibPlot2D::Complex>>&
+//		useDoubleStack	= std::stack<bool>&
+//
+// Output Arguments:
+//		errorString		= wxString&
+//
+// Return Value:
+//		bool, true for success, false otherwise
+//
+//=============================================================================
+bool ExpressionTree::EvaluateUnaryOperator(const wxString &operation, std::stack<double> &doubleStack,
+	std::stack<std::vector<LibPlot2D::Complex>> &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const
+{
+	if (operation.Cmp(_T("-")) != 0)
+	{
+		errorString = _T("Attempting to apply operator without two operands!");
+		return false;
+	}
+
+	double value;
+	std::vector<LibPlot2D::Complex> vector;
+	if (PopFromStack(doubleStack, vectorStack, useDoubleStack, value, vector))
+		PushToStack(ApplyOperation(_T("*"), -1.0, value), doubleStack, useDoubleStack);
+	else
+		PushToStack(ApplyOperation(_T("*"), -1.0, vector), vectorStack, useDoubleStack);
+
 	return true;
 }
 
@@ -917,7 +997,7 @@ bool ExpressionTree::EvaluateNumber(const wxString &number, std::stack<double> &
 // Description:		Evaluates the frequency specified.
 //
 // Input Arguments:
-//		vectorStack		= std::stack<std::vector<LibPlot2D::Complex> >&
+//		vectorStack		= std::stack<std::vector<LibPlot2D::Complex>>&
 //		useDoubleStack	= std::stack<bool>&
 //
 // Output Arguments:
@@ -927,7 +1007,7 @@ bool ExpressionTree::EvaluateNumber(const wxString &number, std::stack<double> &
 //		bool, true for success, false otherwise
 //
 //==========================================================================
-bool ExpressionTree::EvaluateS(std::stack<std::vector<LibPlot2D::Complex> > &vectorStack,
+bool ExpressionTree::EvaluateS(std::stack<std::vector<LibPlot2D::Complex>> &vectorStack,
 	std::stack<bool> &useDoubleStack) const
 {
 	PushToStack(dataVector, vectorStack, useDoubleStack);
@@ -943,23 +1023,29 @@ bool ExpressionTree::EvaluateS(std::stack<std::vector<LibPlot2D::Complex> > &vec
 //					appropriate action.
 //
 // Input Arguments:
-//		operation			= const wxString&
-//		leftOperandIsDouble	= const bool&
+//		next			= const wxString&
+//		doubleStack		= std::stack<double>&
+//		vectorStack		= std::stack<std::vector<LibPlot2D::Complex>>&
+//		useDoubleStack	= std::stack<bool>&
 //
 // Output Arguments:
-//		None
+//		errorString	= wxString&
 //
 // Return Value:
 //		bool, true for valid operation, false otherwise
 //
 //==========================================================================
 bool ExpressionTree::EvaluateNext(const wxString &next, std::stack<double> &doubleStack,
-		std::stack<std::vector<LibPlot2D::Complex> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const
+		std::stack<std::vector<LibPlot2D::Complex>> &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const
 {
+	if (NextIsNumber(next))
+		return EvaluateNumber(next, doubleStack, useDoubleStack, errorString);
 	if (NextIsOperator(next))
 		return EvaluateOperator(next, doubleStack, vectorStack, useDoubleStack, errorString);
 	if (NextIsS(next))
 		return EvaluateS(vectorStack, useDoubleStack);
+	else
+		errorString = _T("Unable to evaluate '") + next + _T("'.");
 
-	return EvaluateNumber(next, doubleStack, useDoubleStack, errorString);
+	return false;
 }

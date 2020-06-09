@@ -45,7 +45,7 @@ public:
 	wxString GetNumerator(const unsigned int &i) const { return transferFunctions[i].first; }
 	wxString GetDenominator(const unsigned int &i) const { return transferFunctions[i].second; }
 
-	unsigned int GetCount() { return amplitudePlots.GetCount(); }
+	unsigned int GetCount() const { return amplitudePlots.GetCount(); }
 
 	void RemoveAllTransferFunctions();
 	void RemoveTransferFunctions(const unsigned int &i);
@@ -65,7 +65,7 @@ private:
 	LibPlot2D::Dataset2D totalAmplitude;
 	LibPlot2D::Dataset2D totalPhase;
 
-	std::vector<std::pair<wxString, wxString> > transferFunctions;
+	std::vector<std::pair<wxString, wxString>> transferFunctions;
 	wxString ConstructTotalTransferFunction() const;
 	void UpdateAllTransferFunctionData();
 

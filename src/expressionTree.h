@@ -44,14 +44,16 @@ private:
 		const unsigned int &resolution, LibPlot2D::Dataset2D &magnitude, LibPlot2D::Dataset2D &phase);
 
 	wxString ParseExpression(const wxString &expression);
+	wxString ParseNext(const wxString &expression, bool &lastWasOperator,
+		unsigned int &advance, std::stack<wxString> &operatorStack);
 	wxString EvaluateExpression();
 
 	void ProcessOperator(std::stack<wxString> &operatorStack, const wxString &s);
 	void ProcessCloseParenthese(std::stack<wxString> &operatorStack);
 
-	bool NextIsNumber(const wxString &s, unsigned int *stop = NULL) const;
-	bool NextIsOperator(const wxString &s, unsigned int *stop = NULL) const;
-	bool NextIsS(const wxString &s, unsigned int *stop = NULL) const;
+	bool NextIsNumber(const wxString &s, unsigned int *stop = nullptr, const bool &lastWasOperator = true) const;
+	bool NextIsOperator(const wxString &s, unsigned int *stop = nullptr) const;
+	bool NextIsS(const wxString &s, unsigned int *stop = nullptr) const;
 
 	bool IsLeftAssociative(const wxChar &c) const;
 	bool OperatorShift(const wxString &stackString, const wxString &newString) const;
@@ -74,12 +76,14 @@ private:
 		const std::vector<LibPlot2D::Complex> &second) const;
 
 	bool EvaluateNext(const wxString &next, std::stack<double> &doubleStack,
-		std::stack<std::vector<LibPlot2D::Complex> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
+		std::stack<std::vector<LibPlot2D::Complex>> &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
 	bool EvaluateOperator(const wxString &operation, std::stack<double> &doubleStack,
-		std::stack<std::vector<LibPlot2D::Complex> > &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
+		std::stack<std::vector<LibPlot2D::Complex>> &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
+	bool EvaluateUnaryOperator(const wxString &operation, std::stack<double> &doubleStack,
+		std::stack<std::vector<LibPlot2D::Complex>> &vectorStack, std::stack<bool> &useDoubleStack, wxString &errorString) const;
 	bool EvaluateNumber(const wxString &number, std::stack<double> &doubleStack,
 		std::stack<bool> &useDoubleStack, wxString &errorString) const;
-	bool EvaluateS(std::stack<std::vector<LibPlot2D::Complex> > &vectorStack,
+	bool EvaluateS(std::stack<std::vector<LibPlot2D::Complex>> &vectorStack,
 		std::stack<bool> &useDoubleStack) const;
 
 	bool ParenthesesBalanced(const wxString &expression) const;
